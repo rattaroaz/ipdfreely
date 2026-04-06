@@ -9,6 +9,7 @@ public partial class PdfViewerPage : ContentPage
     private IPdfDocumentFactory? _docFactory;
     private PdfContentDetectionService? _detection;
     private PdfExportService? _export;
+    private ILoggingService? _logger;
 
     private IPdfDocument? _document;
     private string? _filePath;
@@ -38,9 +39,18 @@ public partial class PdfViewerPage : ContentPage
         if (Handler?.MauiContext is not { } ctx)
             return;
 
-        _docFactory = ctx.Services.GetRequiredService<IPdfDocumentFactory>();
-        _detection = ctx.Services.GetRequiredService<PdfContentDetectionService>();
-        _export = ctx.Services.GetRequiredService<PdfExportService>();
+        try
+        {
+            _docFactory = ctx.Services.GetRequiredService<IPdfDocumentFactory>();
+            _detection = ctx.Services.GetRequiredService<PdfContentDetectionService>();
+            _export = ctx.Services.GetRequiredService<PdfExportService>();
+            _logger = ctx.Services.GetRequiredService<ILoggingService>();
+            _logger.LogInfo("PdfViewerPage services initialized");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to initialize services: {ex.Message}");
+        }
     }
 
     private void OnPinchUpdated(object? sender, PinchGestureUpdatedEventArgs e)
@@ -64,20 +74,43 @@ public partial class PdfViewerPage : ContentPage
 
     private async void OnOpenClicked(object? sender, EventArgs e)
     {
+        _logger?.LogUserAction("Open PDF clicked");
+        
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        
         await EnsureServicesAsync();
         if (_docFactory is null)
-            return;
-
-        var pick = await FilePicker.Default.PickAsync(new PickOptions
         {
-            PickerTitle = "Open PDF",
-            FileTypes = FilePickerFileType.Pdf
-        });
-
-        if (pick is null)
+            _logger?.LogError("Document factory not available for open operation");
             return;
+        }
 
-        await LoadPdfAsync(pick.FullPath);
+        try
+        {
+            var pick = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = "Open PDF",
+                FileTypes = FilePickerFileType.Pdf
+            });
+
+            if (pick is null)
+            {
+                _logger?.LogInfo("User cancelled file picker");
+                return;
+            }
+
+            _logger?.LogInfo("File selected: {0}", pick.FullPath);
+            await LoadPdfAsync(pick.FullPath);
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Failed to open PDF", ex);
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _logger?.LogPerformance("Open PDF operation", stopwatch.Elapsed);
+        }
     }
 
     private async Task EnsureServicesAsync()
@@ -97,32 +130,49 @@ public partial class PdfViewerPage : ContentPage
     private async Task LoadPdfAsync(string path)
     {
         if (_docFactory is null)
+        {
+            _logger?.LogError("Cannot load PDF: document factory is null");
             return;
+        }
 
-        await DisposeDocumentAsync();
-
-        _filePath = path;
-        StatusLabel.Text = "Loading…";
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        _logger?.LogPdfOperation("Load PDF started", null, path);
 
         try
         {
+            await DisposeDocumentAsync();
+
+            _filePath = path;
+            StatusLabel.Text = "Loading…";
+
             _document = await _docFactory.OpenFromFilePathAsync(path);
             if (_document is null)
             {
+                _logger?.LogError("Failed to open PDF document: factory returned null");
                 StatusLabel.Text = "Could not open PDF.";
                 return;
             }
+
+            _logger?.LogInfo("PDF document opened successfully, pages: {0}", _document.PageCount);
 
             _detectionResult = _detection?.Analyze(path) ?? new PdfContentDetectionResult();
 
             var pagePts = ReadPageSizesPts(path);
             await BuildUiAsync(pagePts);
             StatusLabel.Text = Path.GetFileName(path);
+            
+            _logger?.LogPdfOperation("Load PDF completed", _document.PageCount, path);
         }
         catch (Exception ex)
         {
+            _logger?.LogError("Failed to load PDF", ex);
             StatusLabel.Text = $"Error: {ex.Message}";
             await DisposeDocumentAsync();
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _logger?.LogPerformance("Load PDF", stopwatch.Elapsed, "Pages", _document?.PageCount ?? 0);
         }
     }
 
@@ -320,12 +370,22 @@ public partial class PdfViewerPage : ContentPage
         {
             if (_selectedPageIndex >= 0)
             {
+                _logger?.LogUserAction("Delete page keyboard shortcut", "Page", _selectedPageIndex + 1);
                 bool answer = await DisplayAlertAsync("Confirm Delete", $"Are you sure you want to delete page {_selectedPageIndex + 1}?", "Yes", "No");
                 if (answer)
                 {
                     DeletePage(_selectedPageIndex);
                     _selectedPageIndex = -1;
+                    _logger?.LogInfo("Page deletion confirmed by user");
                 }
+                else
+                {
+                    _logger?.LogInfo("Page deletion cancelled by user");
+                }
+            }
+            else
+            {
+                _logger?.LogWarning("Delete key pressed but no page selected");
             }
         };
 
@@ -341,7 +401,12 @@ public partial class PdfViewerPage : ContentPage
     private void MovePage(int sourceIndex, int targetIndex)
     {
         if (sourceIndex < 0 || sourceIndex >= _pages.Count || targetIndex < 0 || targetIndex >= _pages.Count)
+        {
+            _logger?.LogWarning("Invalid page move indices: source={0}, target={1}, pageCount={2}", sourceIndex, targetIndex, _pages.Count);
             return;
+        }
+
+        _logger?.LogUserAction("Move page", "From", sourceIndex, "To", targetIndex);
 
         var page = _pages[sourceIndex];
         var ui = PagesLayout.Children[sourceIndex];
@@ -370,6 +435,7 @@ public partial class PdfViewerPage : ContentPage
             _selectedPageIndex++;
 
         HighlightSelectedThumbnail();
+        _logger?.LogInfo("Page moved successfully, new selected index: {0}", _selectedPageIndex);
     }
 
     private async void DeletePage(int index)
@@ -377,13 +443,24 @@ public partial class PdfViewerPage : ContentPage
         if (index < 0 || index >= _pages.Count || _pages.Count <= 1)
         {
             if (_pages.Count <= 1)
+            {
+                _logger?.LogWarning("Attempted to delete last page");
                 await DisplayAlertAsync("Delete", "Cannot delete the last page.", "OK");
+            }
+            else
+            {
+                _logger?.LogWarning("Invalid page delete index: {0}, pageCount: {1}", index, _pages.Count);
+            }
             return;
         }
+
+        _logger?.LogUserAction("Delete page", "Index", index);
 
         var host = _pages[index];
 
         var textsToRemove = _userTexts.Where(t => t.Host == host).ToList();
+        _logger?.LogInfo("Removing {0} text overlays from deleted page", textsToRemove.Count);
+        
         foreach (var t in textsToRemove)
             _userTexts.Remove(t);
 
@@ -492,12 +569,14 @@ public partial class PdfViewerPage : ContentPage
 
     private void ClearPageUi()
     {
+        _logger?.LogInfo("Clearing page UI");
         _placementMode = false;
         PagesLayout.Clear();
         ThumbsLayout.Clear();
         _pages.Clear();
         _userTexts.Clear();
         UpdatePlacementUi();
+        _logger?.LogInfo("Page UI cleared, removed {0} pages and {1} text overlays", _pages.Count, _userTexts.Count);
     }
 
     private async Task DisposeDocumentAsync()
@@ -507,11 +586,13 @@ public partial class PdfViewerPage : ContentPage
 
         try
         {
+            _logger?.LogInfo("Disposing document");
             await _document.DisposeAsync();
+            _logger?.LogInfo("Document disposed successfully");
         }
-        catch
+        catch (Exception ex)
         {
-            // ignore
+            _logger?.LogError("Failed to dispose document", ex);
         }
 
         _document = null;
@@ -536,19 +617,24 @@ public partial class PdfViewerPage : ContentPage
         _fieldsVisible = !_fieldsVisible;
         ApplyFieldsVisibility();
         UpdateToggleFieldsText();
+        _logger?.LogUserAction("Toggle fields visibility", "Visible", _fieldsVisible);
     }
 
     private async void OnAddTextClicked(object? sender, EventArgs e)
     {
+        _logger?.LogUserAction("Add text clicked");
+        
         await EnsureServicesAsync();
         if (_document is null || _pages.Count == 0)
         {
+            _logger?.LogWarning("Add text attempted without PDF loaded");
             await DisplayAlertAsync("Add text", "Open a PDF first.", "OK");
             return;
         }
 
         _placementMode = !_placementMode;
         UpdatePlacementUi();
+        _logger?.LogInfo("Text placement mode {0}", _placementMode ? "enabled" : "disabled");
     }
 
     private void UpdatePlacementUi()
@@ -584,6 +670,7 @@ public partial class PdfViewerPage : ContentPage
             var relX = Math.Clamp(pos.Value.X / w, 0, 0.88);
             var relY = Math.Clamp(pos.Value.Y / h, 0, 0.92);
 
+            _logger?.LogUserAction("Text placed on page", "Page", host.PageIndex, "Position", $"({relX:F2}, {relY:F2})");
             AddUserTextOverlay(host, string.Empty, relX, relY);
             _placementMode = false;
             UpdatePlacementUi();
@@ -694,26 +781,35 @@ public partial class PdfViewerPage : ContentPage
 
     private async void OnSaveClicked(object? sender, EventArgs e)
     {
+        _logger?.LogUserAction("Save clicked");
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        
         await EnsureServicesAsync();
         if (_export is null || _document is null || string.IsNullOrEmpty(_filePath))
         {
+            _logger?.LogWarning("Save attempted without document or export service");
             await DisplayAlertAsync("Save", "Nothing to save. Open a PDF first.", "OK");
             return;
         }
 
         StatusLabel.Text = "Exporting…";
+        _logger?.LogInfo("Starting PDF export process");
 
         try
         {
             const double exportMaxW = 2400.0;
             var draws = new List<RasterFormDraw>();
+            var totalTextOverlays = 0;
 
             for (var i = 0; i < _pages.Count; i++)
             {
                 var host = _pages[i];
                 var bmp = await _document.GetPageBitmapAsync(host.OriginalPageIndex, exportMaxW);
                 if (bmp is null)
+                {
+                    _logger?.LogWarning("Failed to get bitmap for page {0}", i);
                     continue;
+                }
 
                 var overlays = _userTexts
                     .Where(t => t.Host == host)
@@ -725,6 +821,8 @@ public partial class PdfViewerPage : ContentPage
                         FontSizePts = t.TextEditor.FontSize
                     })
                     .ToList();
+                
+                totalTextOverlays += overlays.Count;
 
                 draws.Add(new RasterFormDraw
                 {
@@ -736,13 +834,23 @@ public partial class PdfViewerPage : ContentPage
                 });
             }
 
+            _logger?.LogInfo("Processed {0} pages with {1} text overlays", draws.Count, totalTextOverlays);
+
             var pdfBytes = PdfOverlayExportService.BuildPdfFromRastersAndOverlays(draws);
             var ok = await _export.SavePdfAsync(pdfBytes, Path.GetFileName(_filePath) ?? "export.pdf");
+            
             StatusLabel.Text = ok ? "Saved." : "Save cancelled.";
+            _logger?.LogExportOperation("PDF", ok, ok ? Path.GetFileName(_filePath) : null);
         }
         catch (Exception ex)
         {
+            _logger?.LogError("Failed to save PDF", ex);
             StatusLabel.Text = $"Save failed: {ex.Message}";
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _logger?.LogPerformance("Save PDF", stopwatch.Elapsed, "Pages", _pages.Count);
         }
     }
 

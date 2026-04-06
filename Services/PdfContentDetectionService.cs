@@ -11,25 +11,43 @@ namespace ipdfreely.Services;
 
 public sealed class PdfContentDetectionService
 {
+    private readonly ILoggingService? _logger;
+    
+    public PdfContentDetectionService(ILoggingService? logger = null)
+    {
+        _logger = logger;
+    }
+    
     public const int HeuristicSkipWhenFieldCountOnPage = 18;
 
     public PdfContentDetectionResult Analyze(string filePath)
     {
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        _logger?.LogPdfOperation("Content detection started", null, filePath);
+        
         if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+        {
+            _logger?.LogWarning("Content detection failed: invalid file path {0}", filePath);
             return new PdfContentDetectionResult();
+        }
 
-        using var document = UglyToad.PdfPig.PdfDocument.Open(filePath);
-        List<global::UglyToad.PdfPig.Content.Page> pages = document.GetPages().ToList();
+        List<global::UglyToad.PdfPig.Content.Page>? pages = null;
+        try
+        {
+            using var document = UglyToad.PdfPig.PdfDocument.Open(filePath);
+            pages = document.GetPages().ToList();
+            _logger?.LogInfo("Content detection: opened PDF with {0} pages", pages.Count);
 
-        AcroForm? form = null;
-        document.TryGetForm(out form);
+            AcroForm? form = null;
+            document.TryGetForm(out form);
+            _logger?.LogInfo("Content detection: {0}", form is not null ? "AcroForm found" : "No AcroForm");
 
-        var widgetLookup = BuildAllPageWidgetLookups(pages);
+            var widgetLookup = BuildAllPageWidgetLookups(pages);
 
-        var acroFields = new List<DetectedFormField>();
-        var widgetFields = new List<DetectedFormField>();
-        var visualFields = new List<DetectedFormField>();
-        var textLines = new List<DetectedTextRegion>();
+            var acroFields = new List<DetectedFormField>();
+            var widgetFields = new List<DetectedFormField>();
+            var visualFields = new List<DetectedFormField>();
+            var textLines = new List<DetectedTextRegion>();
 
         foreach (global::UglyToad.PdfPig.Content.Page pdfPage in pages)
         {
@@ -74,13 +92,29 @@ public sealed class PdfContentDetectionService
             visualFields.AddRange(CollectVisualInputRectangles(pdfPage, acroOnPage));
         }
 
-        return new PdfContentDetectionResult
+        var result = new PdfContentDetectionResult
         {
             AcroFormFields = acroFields,
             WidgetFields = widgetFields,
             VisualHeuristicFields = visualFields,
             EmbeddedTextLines = textLines
         };
+        
+        _logger?.LogInfo("Content detection completed: AcroForm={0}, Widget={1}, Visual={2}, TextLines={3}", 
+            acroFields.Count, widgetFields.Count, visualFields.Count, textLines.Count);
+        
+        return result;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Content detection failed", ex);
+            return new PdfContentDetectionResult();
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _logger?.LogPerformance("Content detection", stopwatch.Elapsed, "Pages", pages?.Count ?? 0);
+        }
     }
 
     internal static void WalkTopLevelFields(AcroFieldBase field, Action<AcroFieldBase> visit)
