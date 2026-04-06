@@ -1,3 +1,15 @@
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.csproj.AssemblyReference.cache
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\mauiimage.inputs
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\mauifont.inputs
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\mauisplash.inputs
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\mauimanifest.stamp
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.i.cs
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.cs
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\XamlTypeInfo.g.cs
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xaml
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\XamlSaveStateFile.xml
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\Debug\net10.0-windows10.0.19041.0\win-x64\AboutAssets.txt
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\Debug\net10.0-windows10.0.19041.0\win-x64\splashSplashScreen.scale-100.png
@@ -427,18 +439,6 @@ C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\Debug\net10.0-windows
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\Debug\net10.0-windows10.0.19041.0\win-x64\Microsoft.Web.WebView2.Core.Projection.dll
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\Debug\net10.0-windows10.0.19041.0\win-x64\Microsoft.UI.pri
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\Debug\net10.0-windows10.0.19041.0\win-x64\Microsoft.UI.Xaml.Controls.pri
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.csproj.AssemblyReference.cache
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\mauiimage.inputs
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\mauifont.inputs
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\mauisplash.inputs
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\mauimanifest.stamp
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.i.cs
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.cs
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\XamlTypeInfo.g.cs
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xaml
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\XamlSaveStateFile.xml
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\resizetizer\sp\splashSplashScreen.scale-100.png
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\resizetizer\sp\splashSplashScreen.scale-125.png
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\resizetizer\sp\splashSplashScreen.scale-150.png
@@ -504,6 +504,7 @@ C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.AssemblyInfoInputs.cache
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.AssemblyInfo.cs
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.csproj.CoreCompileInputs.cache
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.sourcelink.json
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\XamlC.stamp
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.csproj.Up2Date
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.dll
@@ -526,4 +527,3 @@ C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\qualifiers.txt
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\qualifiers.txt.intermediate
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\MultipleQualifiersPerDimensionFound.txt
-C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\win-x64\ipdfreely.sourcelink.json

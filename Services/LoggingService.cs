@@ -28,11 +28,26 @@ public class LoggingService : ILoggingService
 
     public LoggingService()
     {
-        _logDirectory = Path.Combine(FileSystem.AppDataDirectory, "Logs");
-        _logFilePath = Path.Combine(_logDirectory, $"ipdfreely_{DateTime.Now:yyyyMMdd}.log");
-        
-        EnsureLogDirectory();
-        LogInfo("Logging service initialized");
+        try
+        {
+            var appDataDir = FileSystem.AppDataDirectory;
+            _logDirectory = Path.Combine(appDataDir, "Logs");
+            Directory.CreateDirectory(_logDirectory);
+            
+            var logFileName = $"log_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+            _logFilePath = Path.Combine(_logDirectory, logFileName);
+        }
+        catch (Exception ex)
+        {
+            // Fallback for test environments where MAUI FileSystem is not initialized
+            Console.WriteLine($"Warning: Could not initialize log directory using MAUI FileSystem: {ex.Message}");
+            
+            _logDirectory = Path.Combine(Path.GetTempPath(), "ipdfreely_tests", "Logs");
+            Directory.CreateDirectory(_logDirectory);
+            
+            var logFileName = $"test_log_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+            _logFilePath = Path.Combine(_logDirectory, logFileName);
+        }
     }
 
     private void EnsureLogDirectory()

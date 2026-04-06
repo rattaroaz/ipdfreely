@@ -1,0 +1,260 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using ipdfreely.Services;
+
+namespace ipdfreely.Tests;
+
+public class LoggingServiceTests
+{
+    private readonly LoggingService _loggingService;
+
+    public LoggingServiceTests()
+    {
+        _loggingService = new LoggingService();
+    }
+
+    public void LoggingService_Constructor_ShouldInitializeSuccessfully()
+    {
+        // Arrange & Act
+        var service = new LoggingService();
+        
+        // Assert
+        if (service == null)
+            throw new Exception("LoggingService should not be null");
+    }
+
+    public void LogInfo_ShouldWriteToConsole()
+    {
+        // Arrange
+        var service = new LoggingService();
+        
+        // Act & Assert - Should not throw
+        service.LogInfo("Test info message");
+        service.LogInfo("Test info with parameter: {0}", "parameter");
+    }
+
+    public void LogError_ShouldHandleException()
+    {
+        // Arrange
+        var service = new LoggingService();
+        var exception = new InvalidOperationException("Test exception");
+        
+        // Act & Assert - Should not throw
+        service.LogError("Test error message", exception);
+        service.LogError("Test error without exception");
+    }
+
+    public void LogUserAction_ShouldLogActionWithDetails()
+    {
+        // Arrange
+        var service = new LoggingService();
+        
+        // Act & Assert - Should not throw
+        service.LogUserAction("Test action");
+        service.LogUserAction("Test action with details", "detail1", "detail2");
+    }
+
+    public void LogPerformance_ShouldLogOperationWithDuration()
+    {
+        // Arrange
+        var service = new LoggingService();
+        var duration = TimeSpan.FromMilliseconds(123.45);
+        
+        // Act & Assert - Should not throw
+        service.LogPerformance("Test operation", duration);
+        service.LogPerformance("Test operation with details", duration, "detail1", "detail2");
+    }
+
+    public void LogPdfOperation_ShouldLogPdfOperations()
+    {
+        // Arrange
+        var service = new LoggingService();
+        
+        // Act & Assert - Should not throw
+        service.LogPdfOperation("Load PDF");
+        service.LogPdfOperation("Load PDF", 5);
+        service.LogPdfOperation("Load PDF", 5, "test.pdf");
+    }
+
+    public void LogExportOperation_ShouldLogExportOperations()
+    {
+        // Arrange
+        var service = new LoggingService();
+        
+        // Act & Assert - Should not throw
+        service.LogExportOperation("PDF", true);
+        service.LogExportOperation("PDF", false, "output.pdf");
+    }
+
+    public async Task FlushAsync_ShouldCompleteSuccessfully()
+    {
+        // Arrange
+        var service = new LoggingService();
+        service.LogInfo("Test message before flush");
+        
+        // Act & Assert - Should not throw
+        await service.FlushAsync();
+    }
+
+    public void GetRecentLogs_ShouldReturnRecentLogEntries()
+    {
+        // Arrange
+        var service = new LoggingService();
+        service.LogInfo("Test message 1");
+        service.LogInfo("Test message 2");
+        service.LogInfo("Test message 3");
+        
+        // Act
+        var recentLogs = service.GetRecentLogs(2);
+        
+        // Assert
+        if (recentLogs == null)
+            throw new Exception("Recent logs should not be null");
+        
+        if (recentLogs.Length != 2)
+            throw new Exception($"Expected 2 logs, got {recentLogs.Length}");
+        
+        bool hasMessage2 = false, hasMessage3 = false;
+        foreach (var log in recentLogs)
+        {
+            if (log.Contains("Test message 2")) hasMessage2 = true;
+            if (log.Contains("Test message 3")) hasMessage3 = true;
+        }
+        
+        if (!hasMessage2 || !hasMessage3)
+            throw new Exception("Expected messages not found in recent logs");
+    }
+
+    public void GetRecentLogs_WithDefaultCount_ShouldReturnDefaultNumberOfLogs()
+    {
+        // Arrange
+        var service = new LoggingService();
+        for (int i = 0; i < 60; i++)
+        {
+            service.LogInfo($"Test message {i}");
+        }
+        
+        // Act
+        var recentLogs = service.GetRecentLogs();
+        
+        // Assert
+        if (recentLogs == null)
+            throw new Exception("Recent logs should not be null");
+        
+        if (recentLogs.Length != 50)
+            throw new Exception($"Expected 50 logs (default), got {recentLogs.Length}");
+    }
+
+    public void LogDebug_ShouldWriteDebugMessages()
+    {
+        // Arrange
+        var service = new LoggingService();
+        
+        // Act & Assert - Should not throw
+        service.LogDebug("Test debug message");
+        service.LogDebug("Test debug with parameter: {0}", "parameter");
+    }
+
+    public void LogWarning_ShouldWriteWarningMessages()
+    {
+        // Arrange
+        var service = new LoggingService();
+        
+        // Act & Assert - Should not throw
+        service.LogWarning("Test warning message");
+        service.LogWarning("Test warning with parameter: {0}", "parameter");
+    }
+
+    public void MultipleLogCalls_ShouldMaintainOrder()
+    {
+        // Arrange
+        var service = new LoggingService();
+        
+        // Act
+        service.LogInfo("First message");
+        service.LogWarning("Second message");
+        service.LogError("Third message");
+        
+        // Assert
+        var logs = service.GetRecentLogs(3);
+        if (logs == null || logs.Length != 3)
+            throw new Exception("Expected 3 logs");
+        
+        if (!logs[0].Contains("First message"))
+            throw new Exception("First message not in correct position");
+        
+        if (!logs[1].Contains("Second message"))
+            throw new Exception("Second message not in correct position");
+        
+        if (!logs[2].Contains("Third message"))
+            throw new Exception("Third message not in correct position");
+    }
+
+    public void LogWithNullParameters_ShouldHandleGracefully()
+    {
+        // Arrange
+        var service = new LoggingService();
+        
+        // Act & Assert - Should not throw
+        service.LogInfo("Test with null parameter: {0}", (object?)null);
+        service.LogError("Test error", null);
+    }
+
+    public void RunAllTests()
+    {
+        Console.WriteLine("Running LoggingService Tests...");
+        
+        try
+        {
+            LoggingService_Constructor_ShouldInitializeSuccessfully();
+            Console.WriteLine("✓ Constructor test passed");
+            
+            LogInfo_ShouldWriteToConsole();
+            Console.WriteLine("✓ LogInfo test passed");
+            
+            LogError_ShouldHandleException();
+            Console.WriteLine("✓ LogError test passed");
+            
+            LogUserAction_ShouldLogActionWithDetails();
+            Console.WriteLine("✓ LogUserAction test passed");
+            
+            LogPerformance_ShouldLogOperationWithDuration();
+            Console.WriteLine("✓ LogPerformance test passed");
+            
+            LogPdfOperation_ShouldLogPdfOperations();
+            Console.WriteLine("✓ LogPdfOperation test passed");
+            
+            LogExportOperation_ShouldLogExportOperations();
+            Console.WriteLine("✓ LogExportOperation test passed");
+            
+            _loggingService.FlushAsync().Wait();
+            Console.WriteLine("✓ FlushAsync test passed");
+            
+            GetRecentLogs_ShouldReturnRecentLogEntries();
+            Console.WriteLine("✓ GetRecentLogs test passed");
+            
+            GetRecentLogs_WithDefaultCount_ShouldReturnDefaultNumberOfLogs();
+            Console.WriteLine("✓ GetRecentLogs default count test passed");
+            
+            LogDebug_ShouldWriteDebugMessages();
+            Console.WriteLine("✓ LogDebug test passed");
+            
+            LogWarning_ShouldWriteWarningMessages();
+            Console.WriteLine("✓ LogWarning test passed");
+            
+            MultipleLogCalls_ShouldMaintainOrder();
+            Console.WriteLine("✓ Multiple log calls test passed");
+            
+            LogWithNullParameters_ShouldHandleGracefully();
+            Console.WriteLine("✓ Null parameters test passed");
+            
+            Console.WriteLine("All LoggingService tests passed! ✓");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ Test failed: {ex.Message}");
+            throw;
+        }
+    }
+}

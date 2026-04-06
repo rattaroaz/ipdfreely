@@ -1,0 +1,6 @@
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\TestConsole.csproj.AssemblyReference.cache
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\TestConsole.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\TestConsole.AssemblyInfoInputs.cache
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\TestConsole.AssemblyInfo.cs
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\TestConsole.csproj.CoreCompileInputs.cache
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-windows10.0.19041.0\TestConsole.sourcelink.json

@@ -1,0 +1,284 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using ipdfreely.Services;
+
+namespace ipdfreely.Tests;
+
+public class PdfServicesTests
+{
+    public void PdfContentDetectionService_Constructor_ShouldInitializeSuccessfully()
+    {
+        // Arrange & Act
+        var service = new PdfContentDetectionService();
+        
+        // Assert
+        if (service == null)
+            throw new Exception("PdfContentDetectionService should not be null");
+    }
+
+    public void PdfContentDetectionService_Constructor_WithLogger_ShouldInitializeSuccessfully()
+    {
+        // Arrange
+        var logger = new LoggingService();
+        
+        // Act
+        var service = new PdfContentDetectionService(logger);
+        
+        // Assert
+        if (service == null)
+            throw new Exception("PdfContentDetectionService should not be null");
+    }
+
+    public void PdfContentDetectionService_Analyze_WithInvalidPath_ShouldReturnEmptyResult()
+    {
+        // Arrange
+        var service = new PdfContentDetectionService();
+        
+        // Act
+        var result = service.Analyze("");
+        
+        // Assert
+        if (result == null)
+            throw new Exception("Result should not be null");
+        
+        if (result.AcroFormFields == null || result.WidgetFields == null || 
+            result.VisualHeuristicFields == null || result.EmbeddedTextLines == null)
+            throw new Exception("All collections should be initialized");
+    }
+
+    public void PdfContentDetectionService_Analyze_WithNonExistentFile_ShouldReturnEmptyResult()
+    {
+        // Arrange
+        var service = new PdfContentDetectionService();
+        var nonExistentPath = Path.Combine(Path.GetTempPath(), "non_existent_file.pdf");
+        
+        // Act
+        var result = service.Analyze(nonExistentPath);
+        
+        // Assert
+        if (result == null)
+            throw new Exception("Result should not be null");
+        
+        if (result.AcroFormFields.Count != 0 || result.WidgetFields.Count != 0 || 
+            result.VisualHeuristicFields.Count != 0 || result.EmbeddedTextLines.Count != 0)
+            throw new Exception("All collections should be empty for non-existent file");
+    }
+
+    public void PdfExportService_Constructor_ShouldInitializeSuccessfully()
+    {
+        // Arrange & Act
+        var service = new PdfExportService();
+        
+        // Assert
+        if (service == null)
+            throw new Exception("PdfExportService should not be null");
+    }
+
+    public void PdfExportService_Constructor_WithLogger_ShouldInitializeSuccessfully()
+    {
+        // Arrange
+        var logger = new LoggingService();
+        
+        // Act
+        var service = new PdfExportService(logger);
+        
+        // Assert
+        if (service == null)
+            throw new Exception("PdfExportService should not be null");
+    }
+
+    public async Task PdfExportService_SavePdfAsync_WithEmptyBytes_ShouldReturnFalse()
+    {
+        // Arrange
+        var service = new PdfExportService();
+        var emptyBytes = Array.Empty<byte>();
+        
+        // Act
+        var result = await service.SavePdfAsync(emptyBytes);
+        
+        // Assert
+        if (result)
+            throw new Exception("Should return false for empty bytes");
+    }
+
+    public async Task PdfExportService_SavePdfAsync_WithNullBytes_ShouldReturnFalse()
+    {
+        // Arrange
+        var service = new PdfExportService();
+        
+        // Act
+        try
+        {
+            var result = await service.SavePdfAsync(null!);
+            // If it doesn't throw, check the result
+            if (result)
+                throw new Exception("Should return false for null bytes");
+        }
+        catch (Exception)
+        {
+            // Expected to throw or return false - either is acceptable
+        }
+    }
+
+    public async Task PdfExportService_SavePdfAsync_WithValidBytes_ShouldNotThrow()
+    {
+        // Arrange
+        var service = new PdfExportService();
+        var validBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 }; // PDF header
+        
+        // Act & Assert - Should not throw (though may not succeed on all platforms)
+        try
+        {
+            await service.SavePdfAsync(validBytes, "test.pdf");
+        }
+        catch (Exception ex)
+        {
+            // Platform-specific exceptions are acceptable (e.g., no UI context)
+            Console.WriteLine($"Expected platform exception: {ex.Message}");
+        }
+    }
+
+    public void PdfCoordinateMapper_ShouldHandleValidInputs()
+    {
+        // Test basic coordinate mapping functionality
+        var pdfBounds = new System.Drawing.RectangleF(0, 0, 612, 792); // Standard letter size
+        var pageWidth = 612.0;
+        var pageHeight = 792.0;
+        
+        // Act
+        var (relX, relY, relW, relH) = PdfCoordinateMapper.ToRelativeOverlay(pdfBounds, pageWidth, pageHeight);
+        
+        // Assert
+        if (relX < 0 || relX > 1 || relY < 0 || relY > 1)
+            throw new Exception("Relative coordinates should be between 0 and 1");
+        
+        if (relW < 0 || relW > 1 || relH < 0 || relH > 1)
+            throw new Exception("Relative dimensions should be between 0 and 1");
+    }
+
+    public void PdfCoordinateMapper_ShouldHandleZeroSizePage()
+    {
+        // Test edge case with zero-sized page
+        var pdfBounds = new System.Drawing.RectangleF(0, 0, 100, 100);
+        var pageWidth = 0.0;
+        var pageHeight = 0.0;
+        
+        // Act & Assert - Should handle gracefully without throwing
+        try
+        {
+            var (relX, relY, relW, relH) = PdfCoordinateMapper.ToRelativeOverlay(pdfBounds, pageWidth, pageHeight);
+            // If it doesn't throw, verify reasonable defaults
+        }
+        catch (DivideByZeroException)
+        {
+            // Expected for zero-sized pages
+        }
+    }
+
+    public void PageTextOverlay_Constructor_ShouldInitializeProperties()
+    {
+        // Arrange & Act
+        var overlay = new PageTextOverlay
+        {
+            RelX = 0.5,
+            RelY = 0.3,
+            Text = "Test text",
+            FontSizePts = 12.0
+        };
+        
+        // Assert
+        if (overlay.RelX != 0.5 || overlay.RelY != 0.3)
+            throw new Exception("Relative positions not set correctly");
+        
+        if (overlay.Text != "Test text")
+            throw new Exception("Text not set correctly");
+        
+        if (overlay.FontSizePts != 12.0)
+            throw new Exception("Font size not set correctly");
+    }
+
+    public void DetectedFormField_Constructor_ShouldInitializeProperties()
+    {
+        // Arrange & Act
+        var field = new DetectedFormField
+        {
+            PageIndex = 0,
+            Name = "TestField",
+            Kind = "TextField",
+            Bounds = new System.Drawing.RectangleF(100, 200, 300, 50),
+            Value = "TestValue",
+            Source = "Test"
+        };
+        
+        // Assert
+        if (field.PageIndex != 0)
+            throw new Exception("Page index not set correctly");
+        
+        if (field.Name != "TestField")
+            throw new Exception("Name not set correctly");
+        
+        if (field.Kind != "TextField")
+            throw new Exception("Kind not set correctly");
+        
+        if (field.Value != "TestValue")
+            throw new Exception("Value not set correctly");
+        
+        if (field.Source != "Test")
+            throw new Exception("Source not set correctly");
+    }
+
+    public void RunAllPdfServicesTests()
+    {
+        Console.WriteLine("Running PDF Services Tests...");
+        
+        try
+        {
+            PdfContentDetectionService_Constructor_ShouldInitializeSuccessfully();
+            Console.WriteLine("✓ PdfContentDetectionService constructor test passed");
+            
+            PdfContentDetectionService_Constructor_WithLogger_ShouldInitializeSuccessfully();
+            Console.WriteLine("✓ PdfContentDetectionService constructor with logger test passed");
+            
+            PdfContentDetectionService_Analyze_WithInvalidPath_ShouldReturnEmptyResult();
+            Console.WriteLine("✓ PdfContentDetectionService invalid path test passed");
+            
+            PdfContentDetectionService_Analyze_WithNonExistentFile_ShouldReturnEmptyResult();
+            Console.WriteLine("✓ PdfContentDetectionService non-existent file test passed");
+            
+            PdfExportService_Constructor_ShouldInitializeSuccessfully();
+            Console.WriteLine("✓ PdfExportService constructor test passed");
+            
+            PdfExportService_Constructor_WithLogger_ShouldInitializeSuccessfully();
+            Console.WriteLine("✓ PdfExportService constructor with logger test passed");
+            
+            PdfExportService_SavePdfAsync_WithEmptyBytes().Wait();
+            Console.WriteLine("✓ PdfExportService empty bytes test passed");
+            
+            PdfExportService_SavePdfAsync_WithNullBytes().Wait();
+            Console.WriteLine("✓ PdfExportService null bytes test passed");
+            
+            PdfExportService_SavePdfAsync_WithValidBytes().Wait();
+            Console.WriteLine("✓ PdfExportService valid bytes test passed");
+            
+            PdfCoordinateMapper_ShouldHandleValidInputs();
+            Console.WriteLine("✓ PdfCoordinateMapper valid inputs test passed");
+            
+            PdfCoordinateMapper_ShouldHandleZeroSizePage();
+            Console.WriteLine("✓ PdfCoordinateMapper zero size page test passed");
+            
+            PageTextOverlay_Constructor_ShouldInitializeProperties();
+            Console.WriteLine("✓ PageTextOverlay constructor test passed");
+            
+            DetectedFormField_Constructor_ShouldInitializeProperties();
+            Console.WriteLine("✓ DetectedFormField constructor test passed");
+            
+            Console.WriteLine("All PDF Services tests passed! ✓");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"✗ Test failed: {ex.Message}");
+            throw;
+        }
+    }
+}

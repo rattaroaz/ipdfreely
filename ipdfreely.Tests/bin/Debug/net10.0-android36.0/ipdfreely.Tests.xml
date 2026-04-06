@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ipdfreely.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:ipdfreely.Tests.Resource">
+            <summary>
+            Android Resource Designer class.
+            Exposes the Android Resource designer assembly into the project Namespace.
+            </summary>
+        </member>
+        <member name="T:ipdfreely.Services.PdfCoordinateMapper">
+            <summary>
+            Maps PDF user space (origin bottom-left, Y increasing upward) to MAUI-style overlay coordinates
+            normalized to the page (origin top-left, X and Y as fractions of page width/height).
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Services.PdfCoordinateMapper.ToRelativeOverlay(UglyToad.PdfPig.Core.PdfRectangle,System.Double,System.Double)">
+            <summary>
+            Converts a PDF-axis-aligned rectangle into relative overlay metrics (top-left based).
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Services.PdfCoordinateMapper.AdjustPositionForProportionalSize(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Converts normalized overlay coordinates into pixel positions for a view that preserves
+            the same aspect ratio as the reference page size (proportional scaling).
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfFromRastersAndOverlays(System.Collections.Generic.IReadOnlyList{ipdfreely.Services.RasterFormDraw},System.Double)">
+            <summary>
+            Builds a new PDF from full-page PNG rasters and optional overlay text per page.
+            Raster dimensions are interpreted at <paramref name="sourceDpi"/> to size each PDF page in points.
+            Overlay positions use top-left normalized coordinates (0–1) matching <see cref="T:ipdfreely.Services.PdfCoordinateMapper"/>.
+            </summary>
+        </member>
+    </members>
+</doc>

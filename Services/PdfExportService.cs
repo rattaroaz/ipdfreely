@@ -30,6 +30,8 @@ public sealed class PdfExportService
         
         _logger?.LogInfo("Exporting PDF: {0} bytes, suggested name: {1}", pdfBytes.Length, suggestedFileName);
 
+        try
+        {
 #if WINDOWS
         var window = Application.Current?.Windows?.FirstOrDefault()?.Handler?.PlatformView as MauiWinUIWindow;
         if (window is null)
@@ -38,52 +40,41 @@ public sealed class PdfExportService
             return false;
         }
 
-        try
-        {
-            var hwnd = WindowNative.GetWindowHandle(window);
-            var picker = new FileSavePicker();
-            InitializeWithWindow.Initialize(picker, hwnd);
-            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(suggestedFileName);
-            picker.FileTypeChoices.Add("PDF", new List<string> { ".pdf" });
+        var hwnd = WindowNative.GetWindowHandle(window);
+        var picker = new FileSavePicker();
+        InitializeWithWindow.Initialize(picker, hwnd);
+        picker.SuggestedFileName = Path.GetFileNameWithoutExtension(suggestedFileName);
+        picker.FileTypeChoices.Add("PDF", new List<string> { ".pdf" });
 
-            var file = await picker.PickSaveFileAsync().AsTask(ct);
-            if (file is null)
-            {
-                _logger?.LogInfo("Export cancelled by user");
-                return false;
-            }
-
-            await FileIO.WriteBytesAsync(file, pdfBytes).AsTask(ct);
-            _logger?.LogExportOperation("File save picker", true, file.Path);
-            return true;
-        }
-        catch (Exception ex)
+        var file = await picker.PickSaveFileAsync().AsTask(ct);
+        if (file is null)
         {
-            _logger?.LogError("Export failed with file picker", ex);
+            _logger?.LogInfo("Export cancelled by user");
             return false;
         }
+
+        await FileIO.WriteBytesAsync(file, pdfBytes).AsTask(ct);
+        _logger?.LogExportOperation("File save picker", true, file.Path);
+        return true;
 #else
-        try
+        var path = Path.Combine(FileSystem.CacheDirectory, Path.GetFileName(suggestedFileName));
+        await File.WriteAllBytesAsync(path, pdfBytes, ct).ConfigureAwait(false);
+        
+        _logger?.LogInfo("Export: saved to cache, starting share dialog");
+        await Share.Default.RequestAsync(new ShareFileRequest
         {
-            var path = Path.Combine(FileSystem.CacheDirectory, Path.GetFileName(suggestedFileName));
-            await File.WriteAllBytesAsync(path, pdfBytes, ct).ConfigureAwait(false);
-            
-            _logger?.LogInfo("Export: saved to cache, starting share dialog");
-            await Share.Default.RequestAsync(new ShareFileRequest
-            {
-                Title = "Save PDF",
-                File = new ShareFile(path)
-            }).ConfigureAwait(false);
-            
-            _logger?.LogExportOperation("Share dialog", true, path);
-            return true;
+            Title = "Save PDF",
+            File = new ShareFile(path)
+        }).ConfigureAwait(false);
+        
+        _logger?.LogExportOperation("Share dialog", true, path);
+        return true;
+#endif
         }
         catch (Exception ex)
         {
-            _logger?.LogError("Export failed with share dialog", ex);
+            _logger?.LogError("Export failed", ex);
             return false;
-        }
-#endif
         }
         finally
         {
