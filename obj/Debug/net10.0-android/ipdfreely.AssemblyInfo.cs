@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ipdfreely")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+9bb6dccfbdb0aafa013530e345f1833dd7463461")]
 [assembly: System.Reflection.AssemblyProductAttribute("ipdfreely")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ipdfreely")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
