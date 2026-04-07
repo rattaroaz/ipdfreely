@@ -43,9 +43,17 @@ public static class PdfOverlayExportService
             {
                 var xPt = overlay.RelX * wPt;
                 var yPt = overlay.RelY * hPt;
-                var font = new XFont("OpenSans", overlay.FontSizePts, XFontStyle.Regular);
-                gfx.DrawString(overlay.Text, font, XBrushes.Black, XUnit.FromPoint(xPt), XUnit.FromPoint(yPt),
-                    XStringFormats.TopLeft);
+                var overlayWPt = overlay.RelW * wPt;
+                var overlayHPt = overlay.RelH * hPt;
+                
+                // The font size in PDF points is proportional to the page height in PDF points
+                var scaledFontPts = overlay.RelFontSize * hPt;
+                
+                var font = new XFont("OpenSans", scaledFontPts, XFontStyle.Regular);
+                
+                // Adjust Y slightly down because TopLeft in PdfSharp still puts the baseline near the top,
+                // but actually TopLeft with a Rect aligns the top of the text to the top of the rect.
+                gfx.DrawString(overlay.Text, font, XBrushes.Black, new XRect(xPt, yPt, overlayWPt, overlayHPt), XStringFormats.TopLeft);
             }
         }
 

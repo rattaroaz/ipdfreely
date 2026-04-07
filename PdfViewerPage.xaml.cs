@@ -1,5 +1,6 @@
 using ipdfreely.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Layouts;
 
 namespace ipdfreely;
@@ -159,7 +160,7 @@ public partial class PdfViewerPage : ContentPage
 
             var pagePts = ReadPageSizesPts(path);
             await BuildUiAsync(pagePts);
-            StatusLabel.Text = Path.GetFileName(path);
+            StatusLabel.Text = System.IO.Path.GetFileName(path);
             
             _logger?.LogPdfOperation("Load PDF completed", _document.PageCount, path);
         }
@@ -647,7 +648,7 @@ public partial class PdfViewerPage : ContentPage
             return;
         }
 
-        StatusLabel.Text = string.IsNullOrEmpty(_filePath) ? string.Empty : Path.GetFileName(_filePath);
+        StatusLabel.Text = string.IsNullOrEmpty(_filePath) ? string.Empty : System.IO.Path.GetFileName(_filePath);
     }
 
     private void AttachOverlayPlacementTap(PageHost host, AbsoluteLayout overlay)
@@ -681,17 +682,22 @@ public partial class PdfViewerPage : ContentPage
 
     private void AddUserTextOverlay(PageHost host, string text, double relX, double relY)
     {
+        // Start with a default size and font
         var fontPts = 14.0;
         var approxW = 0.22;
         var approxH = 0.06;
+
+        var container = new AbsoluteLayout
+        {
+            ZIndex = 2
+        };
 
         var border = new Border
         {
             BackgroundColor = Color.FromRgba(255, 255, 200, 0.92),
             Stroke = Colors.DarkGoldenrod,
             StrokeThickness = 1,
-            ZIndex = 2,
-            Padding = new Thickness(4, 2)
+            Padding = new Thickness(26, 0)
         };
 
         var editor = new Editor
@@ -701,46 +707,150 @@ public partial class PdfViewerPage : ContentPage
             TextColor = Colors.Black,
             BackgroundColor = Colors.Transparent,
             AutoSize = EditorAutoSizeOption.TextChanges,
-            MaxLength = 2000
+            MaxLength = 2000,
+            HorizontalOptions = LayoutOptions.Fill,
+            VerticalOptions = LayoutOptions.Fill,
+            // 2 pixels padding top and bottom as requested
+            Margin = new Thickness(0, 2, 0, 2)
         };
 
         border.Content = editor;
 
-        AbsoluteLayout.SetLayoutBounds(border, new Rect(relX, relY, approxW, approxH));
-        AbsoluteLayout.SetLayoutFlags(border, AbsoluteLayoutFlags.All);
+        var deleteBtn = new Button
+        {
+            Text = "✕",
+            TextColor = Colors.White,
+            BackgroundColor = Colors.Red,
+            CornerRadius = 12,
+            WidthRequest = 24,
+            HeightRequest = 24,
+            Padding = 0,
+            Margin = 0,
+            FontSize = 12,
+            ZIndex = 3
+        };
 
-        host.Overlay.Children.Add(border);
+        var dragHandle = new Border
+        {
+            BackgroundColor = Colors.DarkBlue,
+            WidthRequest = 24,
+            HeightRequest = 24,
+            StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(12) },
+            ZIndex = 3
+        };
+        ToolTipProperties.SetText(dragHandle, "Drag to move");
+
+        var resizeHandle = new Border
+        {
+            BackgroundColor = Colors.DarkGoldenrod,
+            WidthRequest = 24,
+            HeightRequest = 24,
+            StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(12) },
+            ZIndex = 3
+        };
+        ToolTipProperties.SetText(resizeHandle, "Drag to resize");
+
+        container.Children.Add(border);
+        container.Children.Add(deleteBtn);
+        container.Children.Add(resizeHandle);
+        container.Children.Add(dragHandle);
+
+        // Initially position elements within the container
+        AbsoluteLayout.SetLayoutFlags(border, AbsoluteLayoutFlags.All);
+        AbsoluteLayout.SetLayoutBounds(border, new Rect(0, 0, 1, 1));
+
+        // Delete button top right
+        AbsoluteLayout.SetLayoutFlags(deleteBtn, AbsoluteLayoutFlags.PositionProportional);
+        AbsoluteLayout.SetLayoutBounds(deleteBtn, new Rect(1, 0, 24, 24));
+
+        // Resize handle bottom right
+        AbsoluteLayout.SetLayoutFlags(resizeHandle, AbsoluteLayoutFlags.PositionProportional);
+        AbsoluteLayout.SetLayoutBounds(resizeHandle, new Rect(1, 1, 24, 24));
+
+        // Drag handle top left
+        AbsoluteLayout.SetLayoutFlags(dragHandle, AbsoluteLayoutFlags.PositionProportional);
+        AbsoluteLayout.SetLayoutBounds(dragHandle, new Rect(0, 0, 24, 24));
+
+        AbsoluteLayout.SetLayoutBounds(container, new Rect(relX, relY, approxW, approxH));
+        AbsoluteLayout.SetLayoutFlags(container, AbsoluteLayoutFlags.All);
+
+        host.Overlay.Children.Add(container);
 
         var placed = new UserPlacedText
         {
             Host = host,
             RelX = relX,
             RelY = relY,
+            RelW = approxW,
+            RelH = approxH,
             FontSizePts = fontPts,
             Border = border,
             TextEditor = editor
         };
 
-        AttachDrag(placed, host);
-        AttachDeleteTap(placed, host);
+        AttachDrag(placed, host, container, dragHandle);
+        AttachResize(placed, host, container, resizeHandle);
+        
+        deleteBtn.Clicked += (_, _) => 
+        {
+            host.Overlay.Children.Remove(container);
+            _userTexts.Remove(placed);
+        };
 
         _userTexts.Add(placed);
 
         Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(10), () => editor.Focus());
     }
 
-    private void AttachDeleteTap(UserPlacedText placed, PageHost host)
+    private void AttachResize(UserPlacedText placed, PageHost host, AbsoluteLayout container, View handle)
     {
-        var tap = new TapGestureRecognizer { NumberOfTapsRequired = 2 };
-        tap.Tapped += (_, _) =>
+        var pan = new PanGestureRecognizer();
+        double startW = 0;
+        double startH = 0;
+        double initialFont = 0;
+
+        pan.PanUpdated += (_, args) =>
         {
-            host.Overlay.Children.Remove(placed.Border);
-            _userTexts.Remove(placed);
+            if (args.StatusType == GestureStatus.Started)
+            {
+                startW = placed.RelW;
+                startH = placed.RelH;
+                initialFont = placed.FontSizePts;
+            }
+            else if (args.StatusType == GestureStatus.Running)
+            {
+                var w = host.DisplayWidth;
+                var h = host.DisplayHeight;
+                if (w <= 0 || h <= 0)
+                    return;
+
+                var nw = startW + (args.TotalX / w);
+                var nh = startH + (args.TotalY / h);
+                
+                // Enforce minimum size
+                nw = Math.Max(0.05, nw);
+                nh = Math.Max(0.02, nh);
+
+                // Enforce bounds
+                nw = Math.Min(nw, 1.0 - placed.RelX);
+                nh = Math.Min(nh, 1.0 - placed.RelY);
+
+                placed.RelW = nw;
+                placed.RelH = nh;
+                
+                // Scale font size based on height change
+                var scaleRatio = nh / startH;
+                placed.FontSizePts = Math.Max(6, initialFont * scaleRatio);
+                placed.TextEditor.FontSize = placed.FontSizePts;
+
+                AbsoluteLayout.SetLayoutBounds(container, new Rect(placed.RelX, placed.RelY, nw, nh));
+            }
         };
-        placed.Border.GestureRecognizers.Add(tap);
+
+        handle.GestureRecognizers.Add(pan);
     }
 
-    private void AttachDrag(UserPlacedText placed, PageHost host)
+    private void AttachDrag(UserPlacedText placed, PageHost host, AbsoluteLayout container, View handle)
     {
         var pan = new PanGestureRecognizer();
         double panStartX = 0;
@@ -762,20 +872,21 @@ public partial class PdfViewerPage : ContentPage
 
                 var nx = panStartX + args.TotalX / w;
                 var ny = panStartY + args.TotalY / h;
-                nx = Math.Clamp(nx, 0, 0.95);
-                ny = Math.Clamp(ny, 0, 0.95);
+                
+                nx = Math.Clamp(nx, 0, 1.0 - placed.RelW);
+                ny = Math.Clamp(ny, 0, 1.0 - placed.RelH);
 
-                var prev = AbsoluteLayout.GetLayoutBounds(placed.Border);
-                AbsoluteLayout.SetLayoutBounds(placed.Border, new Rect(nx, ny, prev.Width, prev.Height));
-            }
-            else if (args.StatusType is GestureStatus.Completed or GestureStatus.Canceled)
-            {
-                var b = AbsoluteLayout.GetLayoutBounds(placed.Border);
-                placed.RelX = b.X;
-                placed.RelY = b.Y;
+                placed.RelX = nx;
+                placed.RelY = ny;
+
+                AbsoluteLayout.SetLayoutBounds(container, new Rect(nx, ny, placed.RelW, placed.RelH));
             }
         };
 
+        // Attach pan to the dedicated drag handle
+        handle.GestureRecognizers.Add(pan);
+        
+        // Also attach to border so user can drag by the background if the editor doesn't steal focus
         placed.Border.GestureRecognizers.Add(pan);
     }
 
@@ -817,8 +928,10 @@ public partial class PdfViewerPage : ContentPage
                     {
                         RelX = t.RelX,
                         RelY = t.RelY,
+                        RelW = t.RelW,
+                        RelH = t.RelH,
                         Text = t.TextEditor.Text ?? string.Empty,
-                        FontSizePts = t.TextEditor.FontSize
+                        RelFontSize = t.FontSizePts / host.DisplayHeight
                     })
                     .ToList();
                 
@@ -837,10 +950,10 @@ public partial class PdfViewerPage : ContentPage
             _logger?.LogInfo("Processed {0} pages with {1} text overlays", draws.Count, totalTextOverlays);
 
             var pdfBytes = PdfOverlayExportService.BuildPdfFromRastersAndOverlays(draws);
-            var ok = await _export.SavePdfAsync(pdfBytes, Path.GetFileName(_filePath) ?? "export.pdf");
+            var ok = await _export.SavePdfAsync(pdfBytes, System.IO.Path.GetFileName(_filePath) ?? "export.pdf");
             
             StatusLabel.Text = ok ? "Saved." : "Save cancelled.";
-            _logger?.LogExportOperation("PDF", ok, ok ? Path.GetFileName(_filePath) : null);
+            _logger?.LogExportOperation("PDF", ok, ok ? System.IO.Path.GetFileName(_filePath) : null);
         }
         catch (Exception ex)
         {
@@ -871,6 +984,8 @@ public partial class PdfViewerPage : ContentPage
         public PageHost Host { get; init; } = null!;
         public double RelX { get; set; }
         public double RelY { get; set; }
+        public double RelW { get; set; }
+        public double RelH { get; set; }
         public double FontSizePts { get; set; }
         public Border Border { get; init; } = null!;
         public Editor TextEditor { get; init; } = null!;

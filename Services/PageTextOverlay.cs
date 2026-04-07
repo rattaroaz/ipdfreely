@@ -2,11 +2,10 @@ namespace ipdfreely.Services;
 
 public sealed class PageTextOverlay
 {
-    public double RelX { get; set; }
-
-    public double RelY { get; set; }
-
-    public string Text { get; set; } = string.Empty;
-
-    public double FontSizePts { get; set; } = 11.0;
+    public double RelX { get; init; }
+    public double RelY { get; init; }
+    public double RelW { get; init; }
+    public double RelH { get; init; }
+    public string Text { get; init; } = string.Empty;
+    public double RelFontSize { get; init; }
 }
