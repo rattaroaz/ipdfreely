@@ -19,6 +19,9 @@ public partial class PdfViewerPage : ContentPage
     private bool _placementMode;
     private double _pinchScale = 1.0;
     private double _pinchBaseScale = 1.0;
+    private const double OverlayCornerControlSizePx = 24.0;
+    private const double OverlayTextHorizontalInsetPx = OverlayCornerControlSizePx + 2.0;
+    private const double OverlayTextVerticalInsetPx = 2.0;
 
     private readonly List<PageHost> _pages = new();
     private readonly List<UserPlacedText> _userTexts = new();
@@ -697,13 +700,14 @@ public partial class PdfViewerPage : ContentPage
             BackgroundColor = Color.FromRgba(255, 255, 200, 0.92),
             Stroke = Colors.DarkGoldenrod,
             StrokeThickness = 1,
-            Padding = new Thickness(26, 0)
+            Padding = new Thickness(OverlayTextHorizontalInsetPx, 0)
         };
 
         var editor = new Editor
         {
             Text = text,
             FontSize = fontPts,
+            FontFamily = "OpenSansRegular",
             TextColor = Colors.Black,
             BackgroundColor = Colors.Transparent,
             AutoSize = EditorAutoSizeOption.TextChanges,
@@ -711,8 +715,10 @@ public partial class PdfViewerPage : ContentPage
             HorizontalOptions = LayoutOptions.Fill,
             VerticalOptions = LayoutOptions.Fill,
             // 2 pixels padding top and bottom as requested
-            Margin = new Thickness(0, 2, 0, 2)
+            Margin = new Thickness(0, OverlayTextVerticalInsetPx, 0, OverlayTextVerticalInsetPx)
         };
+
+        NormalizeOverlayEditorInsets(editor);
 
         border.Content = editor;
 
@@ -890,6 +896,68 @@ public partial class PdfViewerPage : ContentPage
         placed.Border.GestureRecognizers.Add(pan);
     }
 
+    private void NormalizeOverlayEditorInsets(Editor editor)
+    {
+        void ApplyPlatformInsets()
+        {
+            if (editor.Handler?.PlatformView is null)
+                return;
+
+#if WINDOWS
+            if (editor.Handler.PlatformView is Microsoft.UI.Xaml.Controls.TextBox windowsEditor)
+            {
+                windowsEditor.Padding = new Microsoft.UI.Xaml.Thickness(0);
+                windowsEditor.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+            }
+#elif ANDROID
+            if (editor.Handler.PlatformView is AndroidX.AppCompat.Widget.AppCompatEditText androidEditor)
+            {
+                androidEditor.SetPadding(0, 0, 0, 0);
+                androidEditor.SetIncludeFontPadding(false);
+            }
+#elif IOS || MACCATALYST
+            if (editor.Handler.PlatformView is UIKit.UITextView appleEditor)
+            {
+                appleEditor.TextContainerInset = UIKit.UIEdgeInsets.Zero;
+                appleEditor.TextContainer.LineFragmentPadding = 0;
+            }
+#endif
+        }
+
+        editor.HandlerChanged += (_, _) => ApplyPlatformInsets();
+        ApplyPlatformInsets();
+    }
+
+    private static PageTextOverlay ToPageTextOverlay(UserPlacedText text)
+    {
+        var host = text.Host;
+        if (host.DisplayWidth <= 0 || host.DisplayHeight <= 0)
+        {
+            return new PageTextOverlay
+            {
+                RelX = text.RelX,
+                RelY = text.RelY,
+                RelW = text.RelW,
+                RelH = text.RelH,
+                Text = text.TextEditor.Text ?? string.Empty,
+                RelFontSize = 0
+            };
+        }
+
+        var insetX = OverlayTextHorizontalInsetPx / host.DisplayWidth;
+        var insetY = OverlayTextVerticalInsetPx / host.DisplayHeight;
+
+        return new PageTextOverlay
+        {
+            RelX = text.RelX + insetX,
+            RelY = text.RelY + insetY,
+            RelW = Math.Max(0.001, text.RelW - (2 * insetX)),
+            RelH = Math.Max(0.001, text.RelH - (2 * insetY)),
+            Text = text.TextEditor.Text ?? string.Empty,
+            RelFontSize = text.FontSizePts / host.DisplayHeight
+        };
+    }
+
     private async void OnSaveClicked(object? sender, EventArgs e)
     {
         _logger?.LogUserAction("Save clicked");
@@ -924,15 +992,7 @@ public partial class PdfViewerPage : ContentPage
 
                 var overlays = _userTexts
                     .Where(t => t.Host == host)
-                    .Select(t => new PageTextOverlay
-                    {
-                        RelX = t.RelX,
-                        RelY = t.RelY,
-                        RelW = t.RelW,
-                        RelH = t.RelH,
-                        Text = t.TextEditor.Text ?? string.Empty,
-                        RelFontSize = t.FontSizePts / host.DisplayHeight
-                    })
+                    .Select(ToPageTextOverlay)
                     .ToList();
                 
                 totalTextOverlays += overlays.Count;
