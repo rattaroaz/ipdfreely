@@ -16,7 +16,7 @@
   <ImportGroup Condition=" '$(TargetFramework)' == '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)xunit.core\2.9.3\buildMultiTargeting\xunit.core.props" Condition="Exists('$(NuGetPackageRoot)xunit.core\2.9.3\buildMultiTargeting\xunit.core.props')" />
   </ImportGroup>
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net10.0-android36.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net10.0-android' AND '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)xunit.runner.visualstudio\3.1.4\build\net8.0\xunit.runner.visualstudio.props" Condition="Exists('$(NuGetPackageRoot)xunit.runner.visualstudio\3.1.4\build\net8.0\xunit.runner.visualstudio.props')" />
     <Import Project="$(NuGetPackageRoot)xunit.core\2.9.3\build\xunit.core.props" Condition="Exists('$(NuGetPackageRoot)xunit.core\2.9.3\build\xunit.core.props')" />
     <Import Project="$(NuGetPackageRoot)microsoft.testplatform.testhost\17.14.1\build\net8.0\Microsoft.TestPlatform.TestHost.props" Condition="Exists('$(NuGetPackageRoot)microsoft.testplatform.testhost\17.14.1\build\net8.0\Microsoft.TestPlatform.TestHost.props')" />
@@ -25,28 +25,6 @@
     <Import Project="$(NuGetPackageRoot)microsoft.maui.resizetizer\10.0.1\buildTransitive\Microsoft.Maui.Resizetizer.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.resizetizer\10.0.1\buildTransitive\Microsoft.Maui.Resizetizer.props')" />
     <Import Project="$(NuGetPackageRoot)microsoft.maui.core\10.0.1\buildTransitive\Microsoft.Maui.Core.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.core\10.0.1\buildTransitive\Microsoft.Maui.Core.props')" />
     <Import Project="$(NuGetPackageRoot)microsoft.maui.controls.build.tasks\10.0.1\buildTransitive\netstandard2.0\Microsoft.Maui.Controls.Build.Tasks.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.controls.build.tasks\10.0.1\buildTransitive\netstandard2.0\Microsoft.Maui.Controls.Build.Tasks.props')" />
-  </ImportGroup>
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net10.0-ios26.1' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(NuGetPackageRoot)xunit.runner.visualstudio\3.1.4\build\net8.0\xunit.runner.visualstudio.props" Condition="Exists('$(NuGetPackageRoot)xunit.runner.visualstudio\3.1.4\build\net8.0\xunit.runner.visualstudio.props')" />
-    <Import Project="$(NuGetPackageRoot)xunit.core\2.9.3\build\xunit.core.props" Condition="Exists('$(NuGetPackageRoot)xunit.core\2.9.3\build\xunit.core.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.testplatform.testhost\17.14.1\build\net8.0\Microsoft.TestPlatform.TestHost.props" Condition="Exists('$(NuGetPackageRoot)microsoft.testplatform.testhost\17.14.1\build\net8.0\Microsoft.TestPlatform.TestHost.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.codecoverage\17.14.1\build\netstandard2.0\Microsoft.CodeCoverage.props" Condition="Exists('$(NuGetPackageRoot)microsoft.codecoverage\17.14.1\build\netstandard2.0\Microsoft.CodeCoverage.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk\17.14.1\build\net8.0\Microsoft.NET.Test.Sdk.props" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk\17.14.1\build\net8.0\Microsoft.NET.Test.Sdk.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.net.illink.tasks\10.0.2\build\Microsoft.NET.ILLink.Tasks.props" Condition="Exists('$(NuGetPackageRoot)microsoft.net.illink.tasks\10.0.2\build\Microsoft.NET.ILLink.Tasks.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.resizetizer\10.0.1\buildTransitive\Microsoft.Maui.Resizetizer.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.resizetizer\10.0.1\buildTransitive\Microsoft.Maui.Resizetizer.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.core\10.0.1\buildTransitive\Microsoft.Maui.Core.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.core\10.0.1\buildTransitive\Microsoft.Maui.Core.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.controls.build.tasks\10.0.1\buildTransitive\net6.0-ios10.0\Microsoft.Maui.Controls.Build.Tasks.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.controls.build.tasks\10.0.1\buildTransitive\net6.0-ios10.0\Microsoft.Maui.Controls.Build.Tasks.props')" />
-  </ImportGroup>
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net10.0-maccatalyst26.1' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(NuGetPackageRoot)xunit.runner.visualstudio\3.1.4\build\net8.0\xunit.runner.visualstudio.props" Condition="Exists('$(NuGetPackageRoot)xunit.runner.visualstudio\3.1.4\build\net8.0\xunit.runner.visualstudio.props')" />
-    <Import Project="$(NuGetPackageRoot)xunit.core\2.9.3\build\xunit.core.props" Condition="Exists('$(NuGetPackageRoot)xunit.core\2.9.3\build\xunit.core.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.testplatform.testhost\17.14.1\build\net8.0\Microsoft.TestPlatform.TestHost.props" Condition="Exists('$(NuGetPackageRoot)microsoft.testplatform.testhost\17.14.1\build\net8.0\Microsoft.TestPlatform.TestHost.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.codecoverage\17.14.1\build\netstandard2.0\Microsoft.CodeCoverage.props" Condition="Exists('$(NuGetPackageRoot)microsoft.codecoverage\17.14.1\build\netstandard2.0\Microsoft.CodeCoverage.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk\17.14.1\build\net8.0\Microsoft.NET.Test.Sdk.props" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk\17.14.1\build\net8.0\Microsoft.NET.Test.Sdk.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.net.illink.tasks\10.0.2\build\Microsoft.NET.ILLink.Tasks.props" Condition="Exists('$(NuGetPackageRoot)microsoft.net.illink.tasks\10.0.2\build\Microsoft.NET.ILLink.Tasks.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.resizetizer\10.0.1\buildTransitive\Microsoft.Maui.Resizetizer.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.resizetizer\10.0.1\buildTransitive\Microsoft.Maui.Resizetizer.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.core\10.0.1\buildTransitive\Microsoft.Maui.Core.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.core\10.0.1\buildTransitive\Microsoft.Maui.Core.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.maui.controls.build.tasks\10.0.1\buildTransitive\net6.0-maccatalyst13.1\Microsoft.Maui.Controls.Build.Tasks.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.controls.build.tasks\10.0.1\buildTransitive\net6.0-maccatalyst13.1\Microsoft.Maui.Controls.Build.Tasks.props')" />
   </ImportGroup>
   <ImportGroup Condition=" '$(TargetFramework)' == 'net10.0-windows10.0.19041.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)xunit.runner.visualstudio\3.1.4\build\net8.0\xunit.runner.visualstudio.props" Condition="Exists('$(NuGetPackageRoot)xunit.runner.visualstudio\3.1.4\build\net8.0\xunit.runner.visualstudio.props')" />
@@ -61,16 +39,8 @@
     <Import Project="$(NuGetPackageRoot)microsoft.maui.core\10.0.1\buildTransitive\net10.0-windows10.0.17763.0\Microsoft.Maui.Core.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.core\10.0.1\buildTransitive\net10.0-windows10.0.17763.0\Microsoft.Maui.Core.props')" />
     <Import Project="$(NuGetPackageRoot)microsoft.maui.controls.build.tasks\10.0.1\buildTransitive\net6.0-windows10.0.17763.0\Microsoft.Maui.Controls.Build.Tasks.props" Condition="Exists('$(NuGetPackageRoot)microsoft.maui.controls.build.tasks\10.0.1\buildTransitive\net6.0-windows10.0.17763.0\Microsoft.Maui.Controls.Build.Tasks.props')" />
   </ImportGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0-android36.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0-android' AND '$(ExcludeRestorePackageImports)' != 'true' ">
     <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">C:\Users\kimri\.nuget\packages\xunit.analyzers\1.18.0</Pkgxunit_analyzers>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0-ios26.1' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">C:\Users\kimri\.nuget\packages\xunit.analyzers\1.18.0</Pkgxunit_analyzers>
-    <PkgMicrosoft_NET_ILLink_Tasks Condition=" '$(PkgMicrosoft_NET_ILLink_Tasks)' == '' ">C:\Users\kimri\.nuget\packages\microsoft.net.illink.tasks\10.0.2</PkgMicrosoft_NET_ILLink_Tasks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0-maccatalyst26.1' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">C:\Users\kimri\.nuget\packages\xunit.analyzers\1.18.0</Pkgxunit_analyzers>
-    <PkgMicrosoft_NET_ILLink_Tasks Condition=" '$(PkgMicrosoft_NET_ILLink_Tasks)' == '' ">C:\Users\kimri\.nuget\packages\microsoft.net.illink.tasks\10.0.2</PkgMicrosoft_NET_ILLink_Tasks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0-windows10.0.19041.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
     <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">C:\Users\kimri\.nuget\packages\xunit.analyzers\1.18.0</Pkgxunit_analyzers>

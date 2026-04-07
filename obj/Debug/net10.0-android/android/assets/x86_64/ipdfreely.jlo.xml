@@ -1,0 +1,15 @@
+<api>
+  <jcw-types>
+    <type name="MainActivity" package="crc6456746ec29280ce0c" application_java_class="android.app.Application" mono_runtime_initialization="mono.MonoPackageManager.LoadApplication (context);" extends_type="crc6488302ad6e9e4df1a.MauiAppCompatActivity" partial_assembly_qualified_name="ipdfreely.MainActivity, ipdfreely">
+      <constructors>
+        <constructor name="MainActivity" method="n_.ctor:()V:" jni_signature="()V" managed_parameters="" retval="void" is_dynamically_registered="True" />
+        <constructor name="MainActivity" method="n_.ctor:(I)V:" jni_signature="(I)V" managed_parameters="System.Int32, System.Private.CoreLib" params="int p0" retval="void" is_dynamically_registered="True" super_call="p0" activate_call="p0" />
+      </constructors>
+    </type>
+    <type name="MainApplication" package="crc6456746ec29280ce0c" application_java_class="android.app.Application" mono_runtime_initialization="mono.MonoPackageManager.LoadApplication (context);" extends_type="crc6488302ad6e9e4df1a.MauiApplication" is_application="True" partial_assembly_qualified_name="ipdfreely.MainApplication, ipdfreely" application_constructor="MainApplication" />
+  </jcw-types>
+  <acw-types partial-assembly-name="ipdfreely" module-name="ipdfreely.dll">
+    <type assembly-qualified-name="ipdfreely.MainActivity, ipdfreely, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="ipdfreely.MainActivity" java-key="crc6456746ec29280ce0c.MainActivity" managed-key="ipdfreely.MainActivity" partial-assembly-qualified-name="ipdfreely.MainActivity, ipdfreely" />
+    <type assembly-qualified-name="ipdfreely.MainApplication, ipdfreely, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="ipdfreely.MainApplication" java-key="crc6456746ec29280ce0c.MainApplication" managed-key="ipdfreely.MainApplication" partial-assembly-qualified-name="ipdfreely.MainApplication, ipdfreely" />
+  </acw-types>
+</api>

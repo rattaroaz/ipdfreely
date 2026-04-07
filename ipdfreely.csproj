@@ -62,6 +62,8 @@
 
 	<ItemGroup>
 		<Compile Remove="OldPdfViewerPage.xaml.cs" />
+		<Compile Remove="ipdfreely.Tests\**\*.cs" />
+		<None Remove="ipdfreely.Tests\**\*.*" />
 	</ItemGroup>
 
 	<ItemGroup>

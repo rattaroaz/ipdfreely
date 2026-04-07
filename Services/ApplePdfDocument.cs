@@ -1,7 +1,7 @@
 #if IOS || MACCATALYST
 using CoreGraphics;
 using Foundation;
-using PDFKit;
+using PdfKit;
 using UIKit;
 
 namespace ipdfreely.Services;
@@ -64,7 +64,7 @@ internal sealed class ApplePdfDocument : IPdfDocument
         if (page is null)
             return null;
 
-        var bounds = page.GetBoundsForBox(PdfDisplayBox.MediaBox);
+        var bounds = page.GetBoundsForBox(PdfDisplayBox.Media);
         if (bounds.Width <= 0 || bounds.Height <= 0)
             return null;
 
@@ -79,12 +79,18 @@ internal sealed class ApplePdfDocument : IPdfDocument
         var renderer = new UIGraphicsImageRenderer(new CGSize(pixelW, pixelH), format);
         using var image = renderer.CreateImage(ctx =>
         {
-            ctx.SetFillColor(UIColor.White.CGColor);
-            ctx.FillRect(new CGRect(0, 0, pixelW, pixelH));
-            ctx.SaveState();
-            ctx.ScaleCTM((nfloat)scale, (nfloat)scale);
-            page.Draw(ctx, bounds);
-            ctx.RestoreState();
+            var cgContext = ctx.CGContext;
+            cgContext.SetFillColor(UIColor.White.CGColor);
+            cgContext.FillRect(new CGRect(0, 0, pixelW, pixelH));
+            cgContext.SaveState();
+            
+            // PDF coordinates are bottom-up, iOS is top-down. 
+            // We need to flip the coordinate system and apply scale.
+            cgContext.TranslateCTM(0, pixelH);
+            cgContext.ScaleCTM((nfloat)scale, -(nfloat)scale);
+            
+            page.Draw(PdfDisplayBox.Media, cgContext);
+            cgContext.RestoreState();
         });
 
         using var data = image.AsPNG();

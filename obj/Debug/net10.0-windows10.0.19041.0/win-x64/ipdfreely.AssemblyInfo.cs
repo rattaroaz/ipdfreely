@@ -17,7 +17,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ipdfreely")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+059de75477ed32d5dba89f6e67c65ccd795789b4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+8f9ab3e3d313848037e3f394bcc6175dc9abcafc")]
 [assembly: System.Reflection.AssemblyProductAttribute("ipdfreely")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ipdfreely")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

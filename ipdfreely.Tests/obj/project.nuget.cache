@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "e/76SkxnB1g=",
+  "dgSpecHash": "EV/pUP4j7Mg=",
   "success": true,
   "projectFilePath": "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj",
   "expectedPackageFiles": [
@@ -31,7 +31,6 @@
     "C:\\Users\\kimri\\.nuget\\packages\\microsoft.maui.graphics\\10.0.1\\microsoft.maui.graphics.10.0.1.nupkg.sha512",
     "C:\\Users\\kimri\\.nuget\\packages\\microsoft.maui.graphics.win2d.winui.desktop\\10.0.1\\microsoft.maui.graphics.win2d.winui.desktop.10.0.1.nupkg.sha512",
     "C:\\Users\\kimri\\.nuget\\packages\\microsoft.maui.resizetizer\\10.0.1\\microsoft.maui.resizetizer.10.0.1.nupkg.sha512",
-    "C:\\Users\\kimri\\.nuget\\packages\\microsoft.net.illink.tasks\\10.0.2\\microsoft.net.illink.tasks.10.0.2.nupkg.sha512",
     "C:\\Users\\kimri\\.nuget\\packages\\microsoft.net.test.sdk\\17.14.1\\microsoft.net.test.sdk.17.14.1.nupkg.sha512",
     "C:\\Users\\kimri\\.nuget\\packages\\microsoft.testplatform.objectmodel\\17.14.1\\microsoft.testplatform.objectmodel.17.14.1.nupkg.sha512",
     "C:\\Users\\kimri\\.nuget\\packages\\microsoft.testplatform.testhost\\17.14.1\\microsoft.testplatform.testhost.17.14.1.nupkg.sha512",
@@ -165,8 +164,6 @@
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net10.0-android36.0",
-        "net10.0-ios26.1",
-        "net10.0-maccatalyst26.1",
         "net10.0-windows10.0.19041"
       ]
     },
@@ -180,8 +177,6 @@
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net10.0-android36.0",
-        "net10.0-ios26.1",
-        "net10.0-maccatalyst26.1",
         "net10.0-windows10.0.19041"
       ]
     },
@@ -195,8 +190,6 @@
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net10.0-android36.0",
-        "net10.0-ios26.1",
-        "net10.0-maccatalyst26.1",
         "net10.0-windows10.0.19041"
       ]
     },
@@ -210,8 +203,6 @@
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net10.0-android36.0",
-        "net10.0-ios26.1",
-        "net10.0-maccatalyst26.1",
         "net10.0-windows10.0.19041"
       ]
     },
@@ -225,8 +216,6 @@
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net10.0-android36.0",
-        "net10.0-ios26.1",
-        "net10.0-maccatalyst26.1",
         "net10.0-windows10.0.19041"
       ]
     },
@@ -240,8 +229,6 @@
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net10.0-android36.0",
-        "net10.0-ios26.1",
-        "net10.0-maccatalyst26.1",
         "net10.0-windows10.0.19041"
       ]
     },
@@ -255,8 +242,6 @@
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net10.0-android36.0",
-        "net10.0-ios26.1",
-        "net10.0-maccatalyst26.1",
         "net10.0-windows10.0.19041"
       ]
     }
