@@ -98,3 +98,16 @@ C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\obj\Debug
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\obj\Debug\net10.0-android\stamp\_CleanIntermediateIfNeeded.stamp
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\obj\Debug\net10.0-android\stamp\_ConvertResourcesCases.stamp
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\obj\Debug\net10.0-android\stamp\_ResolveLibraryProjectImports.stamp
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\testhost.exe
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\testhost.dll
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\xunit.abstractions.dll
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\xunit.runner.visualstudio.testadapter.dll
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests.deps.json
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests.runtimeconfig.json
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests.dll
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests.pdb
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests.apk
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests.aab
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests-Signed.aab
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests-Signed.apk
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\ipdfreely.Tests\bin\VerifyBuild\ipdfreely.Tests-Signed.apk.idsig

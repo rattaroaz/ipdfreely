@@ -1,0 +1,3 @@
+[x] when increasing the font size on the add text box, keep the left side of the box still.  Only the right side of the box should expand and contract depending upon the size of the text. 
+[x] when changing the size of the font, the vertical size of the box should increase or decrease accordingly.
+

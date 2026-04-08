@@ -2732,3 +2732,11 @@ C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-android
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-android\stamp\_GenerateJavaStubs.stamp
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-android\stamp\_GeneratePackageManagerJava.stamp
 C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\obj\Debug\net10.0-android\stamp\_ResolveLibraryProjectImports.stamp
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\VerifyBuild\ipdfreely.runtimeconfig.json
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\VerifyBuild\ipdfreely.dll
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\VerifyBuild\ipdfreely.pdb
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\VerifyBuild\com.companyname.ipdfreely.apk
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\VerifyBuild\com.companyname.ipdfreely.aab
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\VerifyBuild\com.companyname.ipdfreely-Signed.aab
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\VerifyBuild\com.companyname.ipdfreely-Signed.apk
+C:\Users\kimri\OneDrive\Desktop\cloned repos\ipdfreely\bin\VerifyBuild\com.companyname.ipdfreely-Signed.apk.idsig
