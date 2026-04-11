@@ -24,8 +24,9 @@
         <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfFromRastersAndOverlays(System.Collections.Generic.IReadOnlyList{ipdfreely.Services.RasterFormDraw},System.Double)">
             <summary>
             Builds a new PDF from full-page PNG rasters and optional overlay text per page.
-            Raster dimensions are interpreted at <paramref name="sourceDpi"/> to size each PDF page in points.
-            Overlay positions use top-left normalized coordinates (0–1) matching <see cref="T:ipdfreely.Services.PdfCoordinateMapper"/>.
+            Uses the original page dimensions so that exported text size and position
+            match the on-screen overlay exactly when viewed at the same page scale.
+            Overlay positions use top-left normalized coordinates (0–1).
             </summary>
         </member>
         <member name="T:ipdfreely.Resource">

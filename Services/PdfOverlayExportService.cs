@@ -1,4 +1,5 @@
 using PdfSharpCore.Drawing;
+using PdfSharpCore.Drawing.Layout;
 using PdfSharpCore.Fonts;
 using PdfSharpCore.Pdf;
 
@@ -13,8 +14,9 @@ public static class PdfOverlayExportService
 
     /// <summary>
     /// Builds a new PDF from full-page PNG rasters and optional overlay text per page.
-    /// Raster dimensions are interpreted at <paramref name="sourceDpi"/> to size each PDF page in points.
-    /// Overlay positions use top-left normalized coordinates (0–1) matching <see cref="PdfCoordinateMapper"/>.
+    /// Uses the original page dimensions so that exported text size and position
+    /// match the on-screen overlay exactly when viewed at the same page scale.
+    /// Overlay positions use top-left normalized coordinates (0–1).
     /// </summary>
     public static byte[] BuildPdfFromRastersAndOverlays(
         IReadOnlyList<RasterFormDraw> pages,
@@ -26,8 +28,16 @@ public static class PdfOverlayExportService
         foreach (var draw in pages.OrderBy(p => p.PageIndex))
         {
             var page = doc.AddPage();
-            var wPt = draw.Width * 72.0 / sourceDpi;
-            var hPt = draw.Height * 72.0 / sourceDpi;
+
+            // Use original page dimensions when available so exported PDF
+            // matches the source page size exactly.
+            var wPt = draw.OriginalPageWidthPts > 0
+                ? draw.OriginalPageWidthPts
+                : draw.Width * 72.0 / sourceDpi;
+            var hPt = draw.OriginalPageHeightPts > 0
+                ? draw.OriginalPageHeightPts
+                : draw.Height * 72.0 / sourceDpi;
+
             page.Width = XUnit.FromPoint(wPt);
             page.Height = XUnit.FromPoint(hPt);
 
@@ -39,21 +49,23 @@ public static class PdfOverlayExportService
                 gfx.DrawImage(img, 0, 0, page.Width, page.Height);
             }
 
+            var tf = new XTextFormatter(gfx);
+
             foreach (var overlay in draw.TextOverlays)
             {
                 var xPt = overlay.RelX * wPt;
                 var yPt = overlay.RelY * hPt;
                 var overlayWPt = overlay.RelW * wPt;
                 var overlayHPt = overlay.RelH * hPt;
-                
-                // The font size in PDF points is proportional to the page height in PDF points
+
                 var scaledFontPts = overlay.RelFontSize * hPt;
-                
+                if (scaledFontPts < 1.0)
+                    scaledFontPts = 1.0;
+
                 var font = new XFont("OpenSans", scaledFontPts, XFontStyle.Regular);
-                
-                // Adjust Y slightly down because TopLeft in PdfSharp still puts the baseline near the top,
-                // but actually TopLeft with a Rect aligns the top of the text to the top of the rect.
-                gfx.DrawString(overlay.Text, font, XBrushes.Black, new XRect(xPt, yPt, overlayWPt, overlayHPt), XStringFormats.TopLeft);
+
+                tf.DrawString(overlay.Text, font, XBrushes.Black,
+                    new XRect(xPt, yPt, overlayWPt, overlayHPt));
             }
         }
 

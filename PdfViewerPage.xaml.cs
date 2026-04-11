@@ -26,6 +26,16 @@ public partial class PdfViewerPage : ContentPage
     private const double FieldTextHorizontalInsetPx = 4.0;
     private const double FieldTextVerticalInsetPx = 2.0;
 
+    // Extra insets to account for native TextBox residual internal padding
+    // that remains even after NormalizeOverlayEditorInsets zeros Padding/Border.
+#if WINDOWS
+    private const double NativeEditorExtraHInsetPx = 2.0;
+    private const double NativeEditorExtraVInsetPx = 13.0;
+#else
+    private const double NativeEditorExtraHInsetPx = 0.0;
+    private const double NativeEditorExtraVInsetPx = 0.0;
+#endif
+
     private readonly List<PageHost> _pages = new();
     private readonly List<UserPlacedText> _userTexts = new();
     private readonly List<EditableFieldText> _editableFields = new();
@@ -801,7 +811,7 @@ public partial class PdfViewerPage : ContentPage
         // Start with a default size and font
         var fontPts = 14.0;
         var approxW = 0.22;
-        var approxH = 0.06;
+        var approxH = 0.10;
 
         var container = new AbsoluteLayout
         {
@@ -885,20 +895,24 @@ public partial class PdfViewerPage : ContentPage
         };
         ToolTipProperties.SetText(increaseFontBtn, "Increase font size");
 
-        var adjustWidthBtn = new Button
+        var adjustWidthHandle = new Border
+        {
+            BackgroundColor = Colors.DarkCyan,
+            WidthRequest = 16,
+            HeightRequest = 16,
+            StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(8) },
+            ZIndex = 3
+        };
+        adjustWidthHandle.Content = new Label
         {
             Text = "=",
             TextColor = Colors.White,
-            BackgroundColor = Colors.DarkCyan,
-            CornerRadius = 8,
-            WidthRequest = 16,
-            HeightRequest = 16,
-            Padding = 0,
-            Margin = 0,
             FontSize = 12,
-            ZIndex = 3
+            HorizontalTextAlignment = TextAlignment.Center,
+            VerticalTextAlignment = TextAlignment.Center,
+            Margin = new Thickness(0, -2, 0, 0)
         };
-        ToolTipProperties.SetText(adjustWidthBtn, "Change box length");
+        ToolTipProperties.SetText(adjustWidthHandle, "Drag to change box length");
 
         var decreaseFontBtn = new Button
         {
@@ -918,7 +932,7 @@ public partial class PdfViewerPage : ContentPage
         container.Children.Add(border);
         container.Children.Add(deleteBtn);
         container.Children.Add(increaseFontBtn);
-        container.Children.Add(adjustWidthBtn);
+        container.Children.Add(adjustWidthHandle);
         container.Children.Add(decreaseFontBtn);
         container.Children.Add(dragHandle);
 
@@ -934,8 +948,8 @@ public partial class PdfViewerPage : ContentPage
         AbsoluteLayout.SetLayoutFlags(increaseFontBtn, AbsoluteLayoutFlags.PositionProportional);
         AbsoluteLayout.SetLayoutBounds(increaseFontBtn, new Rect(0, 0, 16, 16));
 
-        AbsoluteLayout.SetLayoutFlags(adjustWidthBtn, AbsoluteLayoutFlags.PositionProportional);
-        AbsoluteLayout.SetLayoutBounds(adjustWidthBtn, new Rect(0, 0.5, 16, 16));
+        AbsoluteLayout.SetLayoutFlags(adjustWidthHandle, AbsoluteLayoutFlags.PositionProportional);
+        AbsoluteLayout.SetLayoutBounds(adjustWidthHandle, new Rect(0, 0.5, 16, 16));
 
         // Decrease font bottom left
         AbsoluteLayout.SetLayoutFlags(decreaseFontBtn, AbsoluteLayoutFlags.PositionProportional);
@@ -964,30 +978,13 @@ public partial class PdfViewerPage : ContentPage
         };
 
         AttachDrag(placed, host, container, dragHandle);
+        AttachWidthResize(placed, host, container, adjustWidthHandle);
         editor.TextChanged += (_, _) => Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(5), () => RefreshUserTextOverlayLayout(placed));
         
         increaseFontBtn.Clicked += (_, _) =>
         {
             placed.FontSizePts = Math.Min(72.0, placed.FontSizePts + 2.0);
             placed.TextEditor.FontSize = placed.FontSizePts;
-            Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(10), () => RefreshUserTextOverlayLayout(placed));
-        };
-
-        adjustWidthBtn.Clicked += (_, _) =>
-        {
-            var hostWidth = placed.Host.DisplayWidth;
-            if (hostWidth <= 0)
-                return;
-
-            var textPaddingWidthPx = OverlayTextHorizontalInsetPx * 2;
-            var minTextWidthPx = Math.Max(72.0, placed.FontSizePts * 3.0);
-            var maxTextWidthPx = Math.Max(minTextWidthPx, ((1.0 - placed.RelX) * hostWidth) - textPaddingWidthPx);
-            var currentTextWidthPx = placed.TextEditor.WidthRequest > 0
-                ? placed.TextEditor.WidthRequest
-                : Math.Max(minTextWidthPx, (placed.RelW * hostWidth) - textPaddingWidthPx);
-            var nextTextWidthPx = (placed.PreferredTextWidthPx ?? currentTextWidthPx) + 48.0;
-
-            placed.PreferredTextWidthPx = nextTextWidthPx > maxTextWidthPx ? null : nextTextWidthPx;
             Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(10), () => RefreshUserTextOverlayLayout(placed));
         };
 
@@ -1044,7 +1041,8 @@ public partial class PdfViewerPage : ContentPage
             measuredTextHeightPx = placed.FontSizePts + 12.0;
 
         var totalWidthPx = desiredTextWidthPx + textPaddingWidthPx;
-        var totalHeightPx = Math.Max(measuredTextHeightPx + textPaddingHeightPx, placed.FontSizePts + textPaddingHeightPx + 8.0);
+        var minContainerHeightPx = 52.0;
+        var totalHeightPx = Math.Max(Math.Max(measuredTextHeightPx + textPaddingHeightPx, placed.FontSizePts + textPaddingHeightPx + 8.0), minContainerHeightPx);
 
         var newRelW = Math.Clamp(totalWidthPx / host.DisplayWidth, 0.08, 1.0 - placed.RelX);
         var newRelH = Math.Clamp(totalHeightPx / host.DisplayHeight, 0.04, 1.0 - placed.RelY);
@@ -1111,6 +1109,47 @@ public partial class PdfViewerPage : ContentPage
         placed.Border.GestureRecognizers.Add(pan);
     }
 
+    private void AttachWidthResize(UserPlacedText placed, PageHost host, AbsoluteLayout container, View handle)
+    {
+        var pan = new PanGestureRecognizer();
+        double startTextWidthPx = 0;
+
+        pan.PanUpdated += (_, args) =>
+        {
+            var hostWidth = host.DisplayWidth;
+            if (hostWidth <= 0)
+                return;
+
+            var textPaddingWidthPx = OverlayTextHorizontalInsetPx * 2;
+            var minTextWidthPx = Math.Max(72.0, placed.FontSizePts * 3.0);
+            var maxTextWidthPx = Math.Max(minTextWidthPx, ((1.0 - placed.RelX) * hostWidth) - textPaddingWidthPx);
+
+            if (args.StatusType == GestureStatus.Started)
+            {
+                startTextWidthPx = placed.TextEditor.WidthRequest > 0
+                    ? placed.TextEditor.WidthRequest
+                    : Math.Max(minTextWidthPx, (placed.RelW * hostWidth) - textPaddingWidthPx);
+                return;
+            }
+
+            if (args.StatusType == GestureStatus.Running)
+            {
+                if (Math.Abs(args.TotalX) < 3.0)
+                    return;
+            }
+            else
+            {
+                return;
+            }
+
+            var nextTextWidthPx = Math.Clamp(startTextWidthPx + args.TotalX, minTextWidthPx, maxTextWidthPx);
+            placed.PreferredTextWidthPx = nextTextWidthPx;
+            RefreshUserTextOverlayLayout(placed);
+        };
+
+        handle.GestureRecognizers.Add(pan);
+    }
+
     private void NormalizeOverlayEditorInsets(Editor editor)
     {
         void ApplyPlatformInsets()
@@ -1159,8 +1198,8 @@ public partial class PdfViewerPage : ContentPage
             };
         }
 
-        var insetX = OverlayTextHorizontalInsetPx / host.DisplayWidth;
-        var insetY = OverlayTextVerticalInsetPx / host.DisplayHeight;
+        var insetX = (OverlayTextHorizontalInsetPx + NativeEditorExtraHInsetPx) / host.DisplayWidth;
+        var insetY = (OverlayTextVerticalInsetPx + NativeEditorExtraVInsetPx) / host.DisplayHeight;
 
         return new PageTextOverlay
         {
@@ -1189,8 +1228,8 @@ public partial class PdfViewerPage : ContentPage
             };
         }
 
-        var insetX = FieldTextHorizontalInsetPx / host.DisplayWidth;
-        var insetY = FieldTextVerticalInsetPx / host.DisplayHeight;
+        var insetX = (FieldTextHorizontalInsetPx + NativeEditorExtraHInsetPx) / host.DisplayWidth;
+        var insetY = (FieldTextVerticalInsetPx + NativeEditorExtraVInsetPx) / host.DisplayHeight;
 
         return new PageTextOverlay
         {
@@ -1250,6 +1289,8 @@ public partial class PdfViewerPage : ContentPage
                     PngBytes = bmp.PngBytes,
                     Width = bmp.Width,
                     Height = bmp.Height,
+                    OriginalPageWidthPts = host.PageWidthPts,
+                    OriginalPageHeightPts = host.PageHeightPts,
                     TextOverlays = overlays
                 });
             }

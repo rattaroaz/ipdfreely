@@ -63,5 +63,9 @@ public sealed class RasterFormDraw
 
     public int Height { get; init; }
 
+    public double OriginalPageWidthPts { get; init; }
+
+    public double OriginalPageHeightPts { get; init; }
+
     public IReadOnlyList<PageTextOverlay> TextOverlays { get; init; } = Array.Empty<PageTextOverlay>();
 }
