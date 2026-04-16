@@ -39,6 +39,7 @@ public partial class PdfViewerPage : ContentPage
     private readonly List<PageHost> _pages = new();
     private readonly List<UserPlacedText> _userTexts = new();
     private readonly List<EditableFieldText> _editableFields = new();
+    private Label? _textMeasureProbe;
 
     public PdfViewerPage()
     {
@@ -284,6 +285,15 @@ public partial class PdfViewerPage : ContentPage
 
             AddThumbnail(i, bmp);
         }
+
+        // Assign tab order to editable fields sorted by page, then top-to-bottom, left-to-right
+        var sortedFields = _editableFields
+            .OrderBy(f => f.Host.PageIndex)
+            .ThenBy(f => f.RelY)
+            .ThenBy(f => f.RelX)
+            .ToList();
+        for (var ti = 0; ti < sortedFields.Count; ti++)
+            SetNativeTabIndex(sortedFields[ti].TextEditor, ti);
 
         _fieldsVisible = true;
         ApplyFieldsVisibility();
@@ -645,7 +655,9 @@ public partial class PdfViewerPage : ContentPage
         double relW,
         double relH)
     {
-        var fontPts = Math.Clamp(relH * host.DisplayHeight * 0.5, 8.0, 28.0);
+        var fontPts = field.FontSizePts is > 0
+            ? Math.Clamp(field.FontSizePts.Value, 6.0, 36.0)
+            : Math.Clamp(relH * host.DisplayHeight * 0.5, 8.0, 28.0);
 
         var border = new Border
         {
@@ -688,6 +700,7 @@ public partial class PdfViewerPage : ContentPage
             RelW = relW,
             RelH = relH,
             FontSizePts = fontPts,
+            OriginalValue = field.Value ?? string.Empty,
             Border = border,
             TextEditor = editor
         });
@@ -983,14 +996,16 @@ public partial class PdfViewerPage : ContentPage
         
         increaseFontBtn.Clicked += (_, _) =>
         {
-            placed.FontSizePts = Math.Min(72.0, placed.FontSizePts + 2.0);
+            var step = placed.FontSizePts < 14.0 ? 1.0 : placed.FontSizePts < 28.0 ? 2.0 : 4.0;
+            placed.FontSizePts = Math.Min(72.0, placed.FontSizePts + step);
             placed.TextEditor.FontSize = placed.FontSizePts;
             Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(10), () => RefreshUserTextOverlayLayout(placed));
         };
 
         decreaseFontBtn.Clicked += (_, _) =>
         {
-            placed.FontSizePts = Math.Max(6.0, placed.FontSizePts - 2.0);
+            var step = placed.FontSizePts <= 14.0 ? 1.0 : placed.FontSizePts <= 28.0 ? 2.0 : 4.0;
+            placed.FontSizePts = Math.Max(6.0, placed.FontSizePts - step);
             placed.TextEditor.FontSize = placed.FontSizePts;
             Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(10), () => RefreshUserTextOverlayLayout(placed));
         };
@@ -1026,7 +1041,7 @@ public partial class PdfViewerPage : ContentPage
 
         var naturalTextMeasure = MeasureOverlayText(placed.TextEditor.Text, placed.FontSizePts, double.PositiveInfinity, LineBreakMode.NoWrap);
 
-        var desiredTextWidthPx = naturalTextMeasure.Width + 8.0;
+        var desiredTextWidthPx = naturalTextMeasure.Width + (placed.FontSizePts * 0.5);
         if (!double.IsFinite(desiredTextWidthPx) || desiredTextWidthPx <= 0)
             desiredTextWidthPx = minTextWidthPx;
 
@@ -1038,7 +1053,7 @@ public partial class PdfViewerPage : ContentPage
         var wrappedTextMeasure = MeasureOverlayText(placed.TextEditor.Text, placed.FontSizePts, desiredTextWidthPx, LineBreakMode.WordWrap);
         var measuredTextHeightPx = wrappedTextMeasure.Height;
         if (!double.IsFinite(measuredTextHeightPx) || measuredTextHeightPx <= 0)
-            measuredTextHeightPx = placed.FontSizePts + 12.0;
+            measuredTextHeightPx = placed.FontSizePts * 1.4;
 
         var totalWidthPx = desiredTextWidthPx + textPaddingWidthPx;
         var minContainerHeightPx = 52.0;
@@ -1056,17 +1071,13 @@ public partial class PdfViewerPage : ContentPage
         AbsoluteLayout.SetLayoutBounds(placed.Container, new Rect(absX, absY, totalWidthPx, totalHeightPx));
     }
 
-    private static Size MeasureOverlayText(string? text, double fontSize, double widthConstraint, LineBreakMode lineBreakMode)
+    private Size MeasureOverlayText(string? text, double fontSize, double widthConstraint, LineBreakMode lineBreakMode)
     {
-        var probe = new Label
-        {
-            Text = string.IsNullOrEmpty(text) ? " " : text,
-            FontSize = fontSize,
-            FontFamily = "OpenSansRegular",
-            LineBreakMode = lineBreakMode
-        };
-
-        return probe.Measure(widthConstraint, double.PositiveInfinity);
+        _textMeasureProbe ??= new Label { FontFamily = "OpenSansRegular" };
+        _textMeasureProbe.Text = string.IsNullOrEmpty(text) ? " " : text;
+        _textMeasureProbe.FontSize = fontSize;
+        _textMeasureProbe.LineBreakMode = lineBreakMode;
+        return _textMeasureProbe.Measure(widthConstraint, double.PositiveInfinity);
     }
 
     private void AttachDrag(UserPlacedText placed, PageHost host, AbsoluteLayout container, View handle)
@@ -1079,6 +1090,7 @@ public partial class PdfViewerPage : ContentPage
         {
             if (args.StatusType == GestureStatus.Started)
             {
+                container.Opacity = 0.7;
                 panStartX = placed.RelX;
                 panStartY = placed.RelY;
             }
@@ -1100,13 +1112,15 @@ public partial class PdfViewerPage : ContentPage
 
                 AbsoluteLayout.SetLayoutBounds(container, new Rect(nx * w, ny * h, placed.RelW * w, placed.RelH * h));
             }
+            else
+            {
+                container.Opacity = 1.0;
+            }
         };
 
-        // Attach pan to the dedicated drag handle
+        // Attach pan to the dedicated drag handle only – keeping the border
+        // gesture-free so the Editor can handle text selection and cursor placement.
         handle.GestureRecognizers.Add(pan);
-        
-        // Also attach to border so user can drag by the background if the editor doesn't steal focus
-        placed.Border.GestureRecognizers.Add(pan);
     }
 
     private void AttachWidthResize(UserPlacedText placed, PageHost host, AbsoluteLayout container, View handle)
@@ -1126,6 +1140,7 @@ public partial class PdfViewerPage : ContentPage
 
             if (args.StatusType == GestureStatus.Started)
             {
+                container.Opacity = 0.85;
                 startTextWidthPx = placed.TextEditor.WidthRequest > 0
                     ? placed.TextEditor.WidthRequest
                     : Math.Max(minTextWidthPx, (placed.RelW * hostWidth) - textPaddingWidthPx);
@@ -1139,6 +1154,7 @@ public partial class PdfViewerPage : ContentPage
             }
             else
             {
+                container.Opacity = 1.0;
                 return;
             }
 
@@ -1148,6 +1164,22 @@ public partial class PdfViewerPage : ContentPage
         };
 
         handle.GestureRecognizers.Add(pan);
+    }
+
+    private static void SetNativeTabIndex(Editor editor, int index)
+    {
+        void Apply()
+        {
+#if WINDOWS
+            if (editor.Handler?.PlatformView is Microsoft.UI.Xaml.Controls.TextBox tb)
+                tb.TabIndex = index;
+#endif
+        }
+
+        if (editor.Handler is not null)
+            Apply();
+        else
+            editor.HandlerChanged += (_, _) => Apply();
     }
 
     private void NormalizeOverlayEditorInsets(Editor editor)
@@ -1238,7 +1270,8 @@ public partial class PdfViewerPage : ContentPage
             RelW = Math.Max(0.001, field.RelW - (2 * insetX)),
             RelH = Math.Max(0.001, field.RelH - (2 * insetY)),
             Text = field.TextEditor.Text ?? string.Empty,
-            RelFontSize = field.FontSizePts / host.DisplayHeight
+            RelFontSize = field.FontSizePts / host.DisplayHeight,
+            IsFieldEdit = true
         };
     }
 
@@ -1280,7 +1313,7 @@ public partial class PdfViewerPage : ContentPage
                     .Concat(_editableFields.Where(t => t.Host == host).Select(ToPageTextOverlay))
                     .Where(t => !string.IsNullOrWhiteSpace(t.Text))
                     .ToList();
-                
+
                 totalTextOverlays += overlays.Count;
 
                 draws.Add(new RasterFormDraw
@@ -1349,6 +1382,7 @@ public partial class PdfViewerPage : ContentPage
         public double RelW { get; init; }
         public double RelH { get; init; }
         public double FontSizePts { get; init; }
+        public string OriginalValue { get; init; } = string.Empty;
         public Border Border { get; init; } = null!;
         public Editor TextEditor { get; init; } = null!;
     }

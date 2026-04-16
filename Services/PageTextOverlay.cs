@@ -8,4 +8,5 @@ public sealed class PageTextOverlay
     public double RelH { get; init; }
     public string Text { get; init; } = string.Empty;
     public double RelFontSize { get; init; }
+    public bool IsFieldEdit { get; init; }
 }

@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.AcroForms;
 using UglyToad.PdfPig.AcroForms.Fields;
@@ -43,6 +45,7 @@ public sealed class PdfContentDetectionService
             _logger?.LogInfo("Content detection: {0}", form is not null ? "AcroForm found" : "No AcroForm");
 
             var widgetLookup = BuildAllPageWidgetLookups(pages);
+            var fontSizeLookup = BuildWidgetFontSizeLookup(pages);
 
             var acroFields = new List<DetectedFormField>();
             var widgetFields = new List<DetectedFormField>();
@@ -81,6 +84,7 @@ public sealed class PdfContentDetectionService
                             Kind = MapDetectedKind(leaf),
                             Bounds = bounds.Value,
                             Value = TryGetFieldValue(leaf),
+                            FontSizePts = TryExtractFieldFontSize(leaf, fontSizeLookup),
                             Source = "AcroForm"
                         });
                     });
@@ -125,6 +129,30 @@ public sealed class PdfContentDetectionService
             foreach (var child in nt.Children)
                 WalkTopLevelFields(child, visit);
         }
+    }
+
+    internal static ILookup<string, double> BuildWidgetFontSizeLookup(
+        IReadOnlyList<global::UglyToad.PdfPig.Content.Page> pages)
+    {
+        var pairs = new List<(string Name, double Size)>();
+        foreach (global::UglyToad.PdfPig.Content.Page pdfPage in pages)
+        {
+            foreach (var a in pdfPage.ExperimentalAccess.GetAnnotations())
+            {
+                if (a.Type != AnnotationType.Widget)
+                    continue;
+
+                var name = GetAnnotationFieldName(a);
+                if (string.IsNullOrWhiteSpace(name))
+                    continue;
+
+                var fontSize = TryExtractAnnotationFontSize(a);
+                if (fontSize is > 0)
+                    pairs.Add((name, fontSize.Value));
+            }
+        }
+
+        return pairs.ToLookup(p => p.Name, p => p.Size);
     }
 
     internal static ILookup<string, PdfRectangle> BuildAllPageWidgetLookups(
@@ -180,6 +208,7 @@ public sealed class PdfContentDetectionService
                 Kind = DetectedFieldKind.WidgetAnnotation,
                 Bounds = a.Rectangle,
                 Value = a.Content,
+                FontSizePts = TryExtractAnnotationFontSize(a),
                 Source = "WidgetAnnotation"
             });
         }
@@ -332,6 +361,61 @@ public sealed class PdfContentDetectionService
             AcroFieldType.Signature => DetectedFieldKind.Signature,
             _ => DetectedFieldKind.Unknown
         };
+    }
+
+    internal static double? TryExtractFieldFontSize(AcroFieldBase field, ILookup<string, double>? fontSizeLookup)
+    {
+        if (fontSizeLookup is null)
+            return null;
+
+        // Match by partial name or alternate name against the widget annotation font sizes
+        var partial = field.Information?.PartialName;
+        if (!string.IsNullOrEmpty(partial) && fontSizeLookup.Contains(partial))
+            return fontSizeLookup[partial].FirstOrDefault();
+
+        var alt = field.Information?.AlternateName;
+        if (!string.IsNullOrEmpty(alt) && fontSizeLookup.Contains(alt))
+            return fontSizeLookup[alt].FirstOrDefault();
+
+        return null;
+    }
+
+    internal static double? TryExtractAnnotationFontSize(Annotation annotation)
+    {
+        try
+        {
+            if (annotation.AnnotationDictionary.TryGet(NameToken.Create("DA"), out var daToken))
+                return ParseDaFontSize(daToken);
+        }
+        catch { }
+
+        return null;
+    }
+
+    internal static double? ParseDaFontSize(IToken? token)
+    {
+        if (token is null)
+            return null;
+
+        var da = token switch
+        {
+            StringToken s => s.Data,
+            _ => token.ToString()
+        };
+
+        if (string.IsNullOrWhiteSpace(da))
+            return null;
+
+        // DA format: "/FontName size Tf ..."  e.g. "/Helv 12 Tf 0 g"
+        var match = Regex.Match(da, @"(\d+\.?\d*)\s+Tf\b");
+        if (match.Success &&
+            double.TryParse(match.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var size) &&
+            size > 0)
+        {
+            return size;
+        }
+
+        return null;
     }
 
     private static string? TryGetFieldValue(AcroFieldBase field) => field switch

@@ -27,6 +27,13 @@
             the same aspect ratio as the reference page size (proportional scaling).
             </summary>
         </member>
+        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfWithPreservedContent(System.Byte[],System.Collections.Generic.IReadOnlyDictionary{System.Int32,System.Collections.Generic.IReadOnlyList{ipdfreely.Services.PageTextOverlay}})">
+            <summary>
+            Opens the original PDF and draws text overlays directly on top of existing pages.
+            Preserves all original content (vector graphics, selectable text, images).
+            For field edits, a white rectangle is drawn first to cover the original value.
+            </summary>
+        </member>
         <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfFromRastersAndOverlays(System.Collections.Generic.IReadOnlyList{ipdfreely.Services.RasterFormDraw},System.Double)">
             <summary>
             Builds a new PDF from full-page PNG rasters and optional overlay text per page.

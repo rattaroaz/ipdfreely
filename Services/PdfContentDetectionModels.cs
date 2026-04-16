@@ -39,6 +39,8 @@ public sealed class DetectedFormField
 
     public string? Value { get; init; }
 
+    public double? FontSizePts { get; init; }
+
     public string Source { get; init; } = string.Empty;
 }
 

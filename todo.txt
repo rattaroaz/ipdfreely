@@ -1,3 +1,12 @@
-[x] when increasing the font size on the add text box, keep the left side of the box still.  Only the right side of the box should expand and contract depending upon the size of the text. 
-[x] when changing the size of the font, the vertical size of the box should increase or decrease accordingly.
-
+Priority Ranking (highest impact first)
+#	Improvement	Impact	Effort
+1	Remove pan from border (#4)	Fixes text selection	Trivial
+2	Font-proportional buffers (#5)	Better sizing at all scales	Small
+3	Proportional font steps (#6)	Better UX at extreme sizes	Small
+4	Read actual Editor bounds for export (#2)	Eliminates magic offsets	Medium
+5	Use actual Editor.Measure (#1)	Better size accuracy	Medium
+6	Handle newlines in export (#10)	Multi-line correctness	Small
+7	Extract field font size from PDF (#3)	Correct field text size	Medium
+8	Visual drag feedback (#8)	Polish	Small
+9	Tab navigation (#9)	Productivity	Small
+10	Preserve original PDF content (#7)	Biggest quality gap	Large

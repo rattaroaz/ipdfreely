@@ -1,4 +1,4 @@
-<api type="debug" assembly-name="ipdfreely" mvid="71225cfe780e4346bb00681fcea5ad40">
+<api type="debug" assembly-name="ipdfreely" mvid="7d355d8861e544d4b8420c044f5b06b0">
   <java-to-managed>
     <entry java-name="crc6456746ec29280ce0c/MainActivity" managed-name="ipdfreely.MainActivity, ipdfreely" managed-type-token-id="33554446" />
     <entry java-name="crc6456746ec29280ce0c/MainApplication" managed-name="ipdfreely.MainApplication, ipdfreely" managed-type-token-id="33554447" />

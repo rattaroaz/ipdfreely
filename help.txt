@@ -1,4 +1,6 @@
 
-dotnet test ipdfreely.sln --framework net10.0-windows10.0.19041.0
+dotnet run ipdfreely.sln --framework net10.0-windows10.0.19041.0
+
+
 dotnet test ipdfreely.Tests/ipdfreely.Tests.csproj --framework net10.0-windows10.0.19041.0
 

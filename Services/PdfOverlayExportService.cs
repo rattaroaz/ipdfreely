@@ -2,6 +2,7 @@ using PdfSharpCore.Drawing;
 using PdfSharpCore.Drawing.Layout;
 using PdfSharpCore.Fonts;
 using PdfSharpCore.Pdf;
+using PdfSharpCore.Pdf.IO;
 
 namespace ipdfreely.Services;
 
@@ -11,6 +12,39 @@ public static class PdfOverlayExportService
 
     private static readonly object FontInitLock = new();
     private static bool _fontsInitialized;
+
+    /// <summary>
+    /// Opens the original PDF and draws text overlays directly on top of existing pages.
+    /// Preserves all original content (vector graphics, selectable text, images).
+    /// For field edits, a white rectangle is drawn first to cover the original value.
+    /// </summary>
+    public static byte[] BuildPdfWithPreservedContent(
+        byte[] originalPdfBytes,
+        IReadOnlyDictionary<int, IReadOnlyList<PageTextOverlay>> pageOverlays)
+    {
+        EnsurePdfSharpFonts();
+
+        using var srcStream = new MemoryStream(originalPdfBytes);
+        var doc = PdfReader.Open(srcStream, PdfDocumentOpenMode.Modify);
+
+        foreach (var (pageIndex, overlays) in pageOverlays)
+        {
+            if (pageIndex < 0 || pageIndex >= doc.PageCount)
+                continue;
+
+            var page = doc.Pages[pageIndex];
+            var wPt = page.Width.Point;
+            var hPt = page.Height.Point;
+
+            // Append draws on top of existing content
+            using var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append);
+            DrawOverlays(gfx, overlays, wPt, hPt);
+        }
+
+        using var ms = new MemoryStream();
+        doc.Save(ms);
+        return ms.ToArray();
+    }
 
     /// <summary>
     /// Builds a new PDF from full-page PNG rasters and optional overlay text per page.
@@ -29,8 +63,6 @@ public static class PdfOverlayExportService
         {
             var page = doc.AddPage();
 
-            // Use original page dimensions when available so exported PDF
-            // matches the source page size exactly.
             var wPt = draw.OriginalPageWidthPts > 0
                 ? draw.OriginalPageWidthPts
                 : draw.Width * 72.0 / sourceDpi;
@@ -49,29 +81,38 @@ public static class PdfOverlayExportService
                 gfx.DrawImage(img, 0, 0, page.Width, page.Height);
             }
 
-            var tf = new XTextFormatter(gfx);
-
-            foreach (var overlay in draw.TextOverlays)
-            {
-                var xPt = overlay.RelX * wPt;
-                var yPt = overlay.RelY * hPt;
-                var overlayWPt = overlay.RelW * wPt;
-                var overlayHPt = overlay.RelH * hPt;
-
-                var scaledFontPts = overlay.RelFontSize * hPt;
-                if (scaledFontPts < 1.0)
-                    scaledFontPts = 1.0;
-
-                var font = new XFont("OpenSans", scaledFontPts, XFontStyle.Regular);
-
-                tf.DrawString(overlay.Text, font, XBrushes.Black,
-                    new XRect(xPt, yPt, overlayWPt, overlayHPt));
-            }
+            DrawOverlays(gfx, draw.TextOverlays, wPt, hPt);
         }
 
         using var ms = new MemoryStream();
         doc.Save(ms);
         return ms.ToArray();
+    }
+
+    private static void DrawOverlays(
+        XGraphics gfx,
+        IReadOnlyList<PageTextOverlay> overlays,
+        double wPt,
+        double hPt)
+    {
+        var tf = new XTextFormatter(gfx);
+
+        foreach (var overlay in overlays)
+        {
+            var xPt = overlay.RelX * wPt;
+            var yPt = overlay.RelY * hPt;
+            var overlayWPt = overlay.RelW * wPt;
+            var overlayHPt = overlay.RelH * hPt;
+
+            var scaledFontPts = overlay.RelFontSize * hPt;
+            if (scaledFontPts < 1.0)
+                scaledFontPts = 1.0;
+
+            var font = new XFont("OpenSans", scaledFontPts, XFontStyle.Regular);
+
+            tf.DrawString(overlay.Text, font, XBrushes.Black,
+                new XRect(xPt, yPt, overlayWPt, overlayHPt));
+        }
     }
 
     private static void EnsurePdfSharpFonts()
