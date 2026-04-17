@@ -1,90 +1,136 @@
-# CI: headless tests on Linux (net10.0), full app + WinRT smoke tests on Windows.
-# MAUI workload is only required for building the main app on Windows.
-
-name: CI
-
-on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
-jobs:
-  test-ubuntu-net10:
-    name: Test (Ubuntu, net10.0)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            10.0.x
-
-      - name: Restore test project
-        run: dotnet restore ipdfreely.Tests/ipdfreely.Tests.csproj
-
-      - name: Build & test (headless TFM)
-        run: dotnet test ipdfreely.Tests/ipdfreely.Tests.csproj -c Release -f net10.0 --verbosity normal
-
-  build-and-test-windows:
-    name: Build app & test (Windows)
-    runs-on: windows-latest
-    timeout-minutes: 45
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            10.0.x
-
-      - name: Install MAUI workload
-        run: dotnet workload install maui
-
-      - name: Restore solution
-        run: dotnet restore ipdfreely.sln
-
-      - name: Build app (Windows)
-        run: dotnet build ipdfreely.csproj -c Release -f net10.0-windows10.0.19041.0 --no-restore
-
-      - name: Build tests (Windows TFM, includes WinRT PDF smoke tests)
-        run: dotnet build ipdfreely.Tests/ipdfreely.Tests.csproj -c Release -f net10.0-windows10.0.19041.0 --no-restore
-
-      - name: Test with coverage (Windows TFM)
-        run: dotnet test ipdfreely.Tests/ipdfreely.Tests.csproj -c Release -f net10.0-windows10.0.19041.0 --no-build --no-restore --verbosity normal --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/TestResults" --logger "trx;LogFileName=test_results.trx"
-
-      - name: Upload test & coverage artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-windows
-          path: |
-            TestResults/**/*.trx
-            TestResults/**/coverage.cobertura.xml
-            TestResults/**/coverage.json
-          if-no-files-found: warn
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        if: always()
-        continue-on-error: true
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: TestResults
-          fail_ci_if_error: false
-          verbose: true
+# CI: headless tests on Linux (net10.0), full app + WinRT smoke tests on Windows.
+# MAUI workload is only required for building the main app on Windows.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  test-ubuntu-net10:
+    name: Test (Ubuntu, net10.0)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.x
+
+      - name: Restore test project
+        run: dotnet restore ipdfreely.Tests/ipdfreely.Tests.csproj
+
+      - name: Build & test (headless TFM) with coverage
+        run: >
+          dotnet test ipdfreely.Tests/ipdfreely.Tests.csproj
+          -c Release -f net10.0 --verbosity normal
+          --settings ipdfreely.Tests/coverlet.runsettings
+          --collect:"XPlat Code Coverage"
+          --results-directory "${{ github.workspace }}/TestResults"
+          --logger "trx;LogFileName=test_results_ubuntu.trx"
+
+      - name: Upload test & coverage artifacts (Ubuntu)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-ubuntu
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+            TestResults/**/coverage.json
+          if-no-files-found: warn
+
+      - name: Publish test report (Ubuntu)
+        uses: dorny/test-reporter@v1
+        if: always()
+        continue-on-error: true
+        with:
+          name: Test results (Ubuntu, net10.0)
+          path: TestResults/**/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+
+  build-and-test-windows:
+    name: Build app & test (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.x
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      - name: Restore solution
+        run: dotnet restore ipdfreely.sln
+
+      - name: Build app (Windows)
+        run: dotnet build ipdfreely.csproj -c Release -f net10.0-windows10.0.19041.0 --no-restore
+
+      - name: Build tests (Windows TFM, includes WinRT PDF smoke tests)
+        run: dotnet build ipdfreely.Tests/ipdfreely.Tests.csproj -c Release -f net10.0-windows10.0.19041.0 --no-restore
+
+      - name: Test with coverage (Windows TFM)
+        run: >
+          dotnet test ipdfreely.Tests/ipdfreely.Tests.csproj
+          -c Release -f net10.0-windows10.0.19041.0
+          --no-build --no-restore --verbosity normal
+          --settings ipdfreely.Tests/coverlet.runsettings
+          --collect:"XPlat Code Coverage"
+          --results-directory "${{ github.workspace }}/TestResults"
+          --logger "trx;LogFileName=test_results_windows.trx"
+
+      - name: Upload test & coverage artifacts (Windows)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-windows
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+            TestResults/**/coverage.json
+          if-no-files-found: warn
+
+      - name: Publish test report (Windows)
+        uses: dorny/test-reporter@v1
+        if: always()
+        continue-on-error: true
+        with:
+          name: Test results (Windows, net10.0-windows)
+          path: TestResults/**/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        continue-on-error: true
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: TestResults
+          fail_ci_if_error: false
+          verbose: true

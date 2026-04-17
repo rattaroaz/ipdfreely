@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ipdfreely.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f650698122e8a1fc8828300b301b68c8e1a56687")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f925572bd9335b4f7f71a21ecc21a13c9290d301")]
 [assembly: System.Reflection.AssemblyProductAttribute("ipdfreely.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ipdfreely.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

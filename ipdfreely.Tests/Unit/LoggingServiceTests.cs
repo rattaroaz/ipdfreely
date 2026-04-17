@@ -152,7 +152,7 @@ public class LoggingServiceTests
     public void LogInfo_WithNullParameter_DoesNotThrow()
     {
         var svc = CreateService();
-        var act = () => svc.LogInfo("val={0}", (object?)null);
+        var act = () => svc.LogInfo("val={0}", new object[] { null! });
         act.Should().NotThrow();
     }
 
