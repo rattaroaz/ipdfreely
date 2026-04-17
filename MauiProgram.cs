@@ -17,23 +17,16 @@ namespace ipdfreely
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-#if WINDOWS
-            builder.Services.AddSingleton<IPdfDocumentFactory, WindowsPdfDocumentFactory>();
-#elif ANDROID
-            builder.Services.AddSingleton<IPdfDocumentFactory, AndroidPdfDocumentFactory>();
-#elif IOS || MACCATALYST
-            builder.Services.AddSingleton<IPdfDocumentFactory, ApplePdfDocumentFactory>();
-#else
-            builder.Services.AddSingleton<IPdfDocumentFactory, NullPdfDocumentFactory>();
-#endif
-
-            builder.Services.AddSingleton<PdfContentDetectionService>();
-            builder.Services.AddSingleton<PdfExportService>();
-            builder.Services.AddSingleton<ILoggingService, LoggingService>();
-            builder.Services.AddSingleton<ILoggerProvider, LoggingServiceForwardingLoggerProvider>();
+            // Centralised DI wiring (unit-testable on any TFM via AppServices.Register).
+            // The LoggingService is the authoritative log pipeline:
+            //   - app code uses ILoggingService directly,
+            //   - host/framework ILogger traffic is forwarded into it via
+            //     LoggingServiceForwardingLoggerProvider so every log line ends up in
+            //     the same file + recent-log ring buffer.
+            AppServices.Register(builder.Services);
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
