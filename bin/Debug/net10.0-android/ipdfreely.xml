@@ -21,14 +21,26 @@
             the same aspect ratio as the reference page size (proportional scaling).
             </summary>
         </member>
-        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfWithPreservedContent(System.Byte[],System.Collections.Generic.IReadOnlyDictionary{System.Int32,System.Collections.Generic.IReadOnlyList{ipdfreely.Services.PageTextOverlay}})">
+        <member name="F:ipdfreely.Services.PdfOverlayExportService.SystemFontFiles">
+            <summary>
+            Maps display font name → .ttf filename in the system Fonts directory.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Services.PdfOverlayExportService.GetAvailableFonts">
+            <summary>
+            Returns the list of font names available for user text overlays.
+            Only includes fonts actually present on the system.
+            "Open Sans" (embedded) is always first.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfWithPreservedContent(System.Byte[],System.Collections.Generic.IReadOnlyDictionary{System.Int32,System.Collections.Generic.IReadOnlyList{ipdfreely.Services.PageTextOverlay}},ipdfreely.Services.ILoggingService)">
             <summary>
             Opens the original PDF and draws text overlays directly on top of existing pages.
             Preserves all original content (vector graphics, selectable text, images).
             For field edits, a white rectangle is drawn first to cover the original value.
             </summary>
         </member>
-        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfFromRastersAndOverlays(System.Collections.Generic.IReadOnlyList{ipdfreely.Services.RasterFormDraw},System.Double)">
+        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfFromRastersAndOverlays(System.Collections.Generic.IReadOnlyList{ipdfreely.Services.RasterFormDraw},System.Double,ipdfreely.Services.ILoggingService)">
             <summary>
             Builds a new PDF from full-page PNG rasters and optional overlay text per page.
             Uses the original page dimensions so that exported text size and position

@@ -1,12 +1,5 @@
-Priority Ranking (highest impact first)
-#	Improvement	Impact	Effort
-1	Remove pan from border (#4)	Fixes text selection	Trivial
-2	Font-proportional buffers (#5)	Better sizing at all scales	Small
-3	Proportional font steps (#6)	Better UX at extreme sizes	Small
-4	Read actual Editor bounds for export (#2)	Eliminates magic offsets	Medium
-5	Use actual Editor.Measure (#1)	Better size accuracy	Medium
-6	Handle newlines in export (#10)	Multi-line correctness	Small
-7	Extract field font size from PDF (#3)	Correct field text size	Medium
-8	Visual drag feedback (#8)	Polish	Small
-9	Tab navigation (#9)	Productivity	Small
-10	Preserve original PDF content (#7)	Biggest quality gap	Large
+ Practical priorities (if you invest next)
+Bridge or choose one: e.g. implement ILoggerProvider that forwards to ILoggingService, or document that file logs are the source of truth.
+CI: dotnet test ipdfreely.Tests/ipdfreely.Tests.csproj on Windows (and optionally Android) with coverage upload.
+Lighter test TFM for pure Services tests (net10.0 only) if Android TFM is not required for those assemblies.
+Smoke tests for IPdfDocumentFactory on Windows in a minimal harness, or golden-file tests for PdfOverlayExportService output bytes (you already have export tests — extend with real small PDFs if needed).

@@ -13,11 +13,10 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ipdfreely.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4ab85caad087a8ba7a003dc31d6eb9f478a83187")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f650698122e8a1fc8828300b301b68c8e1a56687")]
 [assembly: System.Reflection.AssemblyProductAttribute("ipdfreely.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ipdfreely.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
-[assembly: System.Runtime.Versioning.RequiresPreviewFeaturesAttribute()]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Android36.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Android21.0")]
 

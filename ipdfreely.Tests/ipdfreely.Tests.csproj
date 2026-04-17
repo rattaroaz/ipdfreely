@@ -1,22 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0-android;net10.0-windows10.0.19041.0</TargetFrameworks>
+    <!-- net10.0: fast headless CI (no MAUI workload). net10.0-windows: WinRT PDF factory smoke tests. -->
+    <TargetFrameworks>net10.0;net10.0-windows10.0.19041.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <UseMaui>true</UseMaui>
-    <SingleProject>true</SingleProject>
-    <EnablePreviewFeatures>True</EnablePreviewFeatures>
-    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+    <RootNamespace>ipdfreely.Tests</RootNamespace>
     <NoWarn>$(NoWarn);MA0002</NoWarn>
-    <!-- Disable Resizetizer to prevent duplicate asset errors -->
-    <DisableMauiResizetizer>true</DisableMauiResizetizer>
-    <UseInterpreter>true</UseInterpreter>
-    
-    <!-- Fix for missing RuntimeIdentifier on Apple platforms during test build -->
-    <RuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">iossimulator-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">maccatalyst-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,8 +23,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Include the source files directly instead of referencing the MAUI app project -->
-    <Compile Include="..\Services\*.cs" Link="Services\%(RecursiveDir)%(Filename)%(Extension)" />
+    <!-- Apple implementation is iOS/Mac-only; omit so net10.0 / Windows test builds stay valid. -->
+    <Compile Include="..\Services\*.cs" Exclude="..\Services\ApplePdfDocument.cs" Link="Services\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+    <Compile Include="..\Platforms\Windows\WindowsPdfDocument.cs" Link="Platforms\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\Resources\Fonts\OpenSans-Regular.ttf" LogicalName="ipdfreely.OpenSansRegular.ttf" />
   </ItemGroup>
 
 </Project>

@@ -68,6 +68,7 @@ public partial class PdfViewerPage : ContentPage
         }
         catch (Exception ex)
         {
+            _logger?.LogError("Failed to initialize services", ex);
             System.Diagnostics.Debug.WriteLine($"Failed to initialize services: {ex.Message}");
         }
     }
@@ -708,7 +709,9 @@ public partial class PdfViewerPage : ContentPage
 
     private void ClearPageUi()
     {
-        _logger?.LogInfo("Clearing page UI");
+        var pageCount = _pages.Count;
+        var textCount = _userTexts.Count;
+        _logger?.LogInfo("Clearing page UI: {0} pages, {1} text overlays", pageCount, textCount);
         _placementMode = false;
         PagesLayout.Clear();
         ThumbsLayout.Clear();
@@ -716,7 +719,6 @@ public partial class PdfViewerPage : ContentPage
         _userTexts.Clear();
         _editableFields.Clear();
         UpdatePlacementUi();
-        _logger?.LogInfo("Page UI cleared, removed {0} pages and {1} text overlays", _pages.Count, _userTexts.Count);
     }
 
     private async Task DisposeDocumentAsync()
@@ -942,11 +944,44 @@ public partial class PdfViewerPage : ContentPage
         };
         ToolTipProperties.SetText(decreaseFontBtn, "Decrease font size");
 
+        var availableFonts = PdfOverlayExportService.GetAvailableFonts();
+
+        var fontBtn = new Border
+        {
+            BackgroundColor = Colors.DarkSlateGray,
+            WidthRequest = 20,
+            HeightRequest = 20,
+            StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(10) },
+            ZIndex = 3
+        };
+        fontBtn.Content = new Label
+        {
+            Text = "f",
+            TextColor = Colors.White,
+            FontSize = 12,
+            FontAttributes = FontAttributes.Italic,
+            HorizontalTextAlignment = TextAlignment.Center,
+            VerticalTextAlignment = TextAlignment.Center
+        };
+        ToolTipProperties.SetText(fontBtn, "Choose font");
+
+        var fontPicker = new Picker
+        {
+            ItemsSource = (System.Collections.IList)availableFonts,
+            SelectedIndex = 0,
+            Opacity = 0.01,
+            WidthRequest = 20,
+            HeightRequest = 20,
+            ZIndex = 4
+        };
+
         container.Children.Add(border);
         container.Children.Add(deleteBtn);
         container.Children.Add(increaseFontBtn);
         container.Children.Add(adjustWidthHandle);
         container.Children.Add(decreaseFontBtn);
+        container.Children.Add(fontPicker);
+        container.Children.Add(fontBtn);
         container.Children.Add(dragHandle);
 
         // Initially position elements within the container
@@ -967,6 +1002,14 @@ public partial class PdfViewerPage : ContentPage
         // Decrease font bottom left
         AbsoluteLayout.SetLayoutFlags(decreaseFontBtn, AbsoluteLayoutFlags.PositionProportional);
         AbsoluteLayout.SetLayoutBounds(decreaseFontBtn, new Rect(0, 1, 16, 16));
+
+        // Font button right side, between delete and drag
+        AbsoluteLayout.SetLayoutFlags(fontBtn, AbsoluteLayoutFlags.PositionProportional);
+        AbsoluteLayout.SetLayoutBounds(fontBtn, new Rect(1, 0.5, 20, 20));
+
+        // Transparent picker overlays the font button so tapping opens the dropdown
+        AbsoluteLayout.SetLayoutFlags(fontPicker, AbsoluteLayoutFlags.PositionProportional);
+        AbsoluteLayout.SetLayoutBounds(fontPicker, new Rect(1, 0.5, 20, 20));
 
         // Drag handle bottom right
         AbsoluteLayout.SetLayoutFlags(dragHandle, AbsoluteLayoutFlags.PositionProportional);
@@ -1007,6 +1050,17 @@ public partial class PdfViewerPage : ContentPage
             var step = placed.FontSizePts <= 14.0 ? 1.0 : placed.FontSizePts <= 28.0 ? 2.0 : 4.0;
             placed.FontSizePts = Math.Max(6.0, placed.FontSizePts - step);
             placed.TextEditor.FontSize = placed.FontSizePts;
+            Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(10), () => RefreshUserTextOverlayLayout(placed));
+        };
+
+        fontPicker.SelectedIndexChanged += (_, _) =>
+        {
+            if (fontPicker.SelectedIndex < 0 || fontPicker.SelectedIndex >= availableFonts.Count)
+                return;
+            var selectedFont = availableFonts[fontPicker.SelectedIndex];
+            placed.FontFamily = selectedFont;
+            // MAUI uses "OpenSansRegular" for the embedded font; system fonts use their display name directly
+            editor.FontFamily = selectedFont == "Open Sans" ? "OpenSansRegular" : selectedFont;
             Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(10), () => RefreshUserTextOverlayLayout(placed));
         };
 
@@ -1240,7 +1294,8 @@ public partial class PdfViewerPage : ContentPage
             RelW = Math.Max(0.001, text.RelW - (2 * insetX)),
             RelH = Math.Max(0.001, text.RelH - (2 * insetY)),
             Text = text.TextEditor.Text ?? string.Empty,
-            RelFontSize = text.FontSizePts / host.DisplayHeight
+            RelFontSize = text.FontSizePts / host.DisplayHeight,
+            FontFamily = text.FontFamily
         };
     }
 
@@ -1330,7 +1385,7 @@ public partial class PdfViewerPage : ContentPage
 
             _logger?.LogInfo("Processed {0} pages with {1} text overlays", draws.Count, totalTextOverlays);
 
-            var pdfBytes = PdfOverlayExportService.BuildPdfFromRastersAndOverlays(draws);
+            var pdfBytes = PdfOverlayExportService.BuildPdfFromRastersAndOverlays(draws, logger: _logger);
             var ok = await _export.SavePdfAsync(pdfBytes, System.IO.Path.GetFileName(_filePath) ?? "export.pdf");
             
             StatusLabel.Text = ok ? "Saved." : "Save cancelled.";
@@ -1368,6 +1423,7 @@ public partial class PdfViewerPage : ContentPage
         public double RelW { get; set; }
         public double RelH { get; set; }
         public double FontSizePts { get; set; }
+        public string FontFamily { get; set; } = "OpenSans";
         public double? PreferredTextWidthPx { get; set; }
         public AbsoluteLayout Container { get; init; } = null!;
         public Border Border { get; init; } = null!;

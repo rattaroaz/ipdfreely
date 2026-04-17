@@ -23,7 +23,7 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net10.0-android",
+          "net10.0",
           "net10.0-windows10.0.19041.0"
         ],
         "sources": {
@@ -32,8 +32,8 @@
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net10.0-android36.0": {
-            "targetAlias": "net10.0-android",
+          "net10.0": {
+            "targetAlias": "net10.0",
             "projectReferences": {}
           },
           "net10.0-windows10.0.19041": {
@@ -54,8 +54,8 @@
         "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
-        "net10.0-android36.0": {
-          "targetAlias": "net10.0-android",
+        "net10.0": {
+          "targetAlias": "net10.0",
           "dependencies": {
             "FluentAssertions": {
               "target": "Package",
@@ -106,12 +106,6 @@
           "assetTargetFallback": true,
           "warn": true,
           "frameworkReferences": {
-            "Microsoft.Android": {
-              "privateAssets": "all"
-            },
-            "Microsoft.Android.Runtimes": {
-              "privateAssets": "all"
-            },
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }

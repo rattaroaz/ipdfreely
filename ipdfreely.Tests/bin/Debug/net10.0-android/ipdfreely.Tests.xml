@@ -4,6 +4,41 @@
         <name>ipdfreely.Tests</name>
     </assembly>
     <members>
+        <member name="T:ipdfreely.Tests.TestHelpers">
+            <summary>
+            Shared utilities for test PDF and PNG generation.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Tests.TestHelpers.EnsureFontResolver">
+            <summary>
+            Ensures PdfSharpCore's font resolver is initialized for tests.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Tests.TestHelpers.CreateMinimalPng">
+            <summary>
+            Creates a minimal valid 1x1 white PNG with correct CRC checksums.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Tests.TestHelpers.CreateSinglePageDraw(System.Int32,System.Double,System.Double,System.Collections.Generic.IReadOnlyList{ipdfreely.Services.PageTextOverlay})">
+            <summary>
+            Creates a single-page raster draw suitable for export tests.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Tests.TestHelpers.CreatePdfWithText(System.String,System.String[])">
+            <summary>
+            Creates a test PDF on disk with the given text lines and returns the path.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Tests.TestHelpers.CreateMultiPagePdf(System.String,System.Int32)">
+            <summary>
+            Creates a multi-page test PDF on disk.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Tests.TestHelpers.CreateEmptyPdf(System.String)">
+            <summary>
+            Creates an empty single-page PDF on disk.
+            </summary>
+        </member>
         <member name="T:ipdfreely.Tests.Resource">
             <summary>
             Android Resource Designer class.
@@ -27,14 +62,26 @@
             the same aspect ratio as the reference page size (proportional scaling).
             </summary>
         </member>
-        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfWithPreservedContent(System.Byte[],System.Collections.Generic.IReadOnlyDictionary{System.Int32,System.Collections.Generic.IReadOnlyList{ipdfreely.Services.PageTextOverlay}})">
+        <member name="F:ipdfreely.Services.PdfOverlayExportService.SystemFontFiles">
+            <summary>
+            Maps display font name → .ttf filename in the system Fonts directory.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Services.PdfOverlayExportService.GetAvailableFonts">
+            <summary>
+            Returns the list of font names available for user text overlays.
+            Only includes fonts actually present on the system.
+            "Open Sans" (embedded) is always first.
+            </summary>
+        </member>
+        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfWithPreservedContent(System.Byte[],System.Collections.Generic.IReadOnlyDictionary{System.Int32,System.Collections.Generic.IReadOnlyList{ipdfreely.Services.PageTextOverlay}},ipdfreely.Services.ILoggingService)">
             <summary>
             Opens the original PDF and draws text overlays directly on top of existing pages.
             Preserves all original content (vector graphics, selectable text, images).
             For field edits, a white rectangle is drawn first to cover the original value.
             </summary>
         </member>
-        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfFromRastersAndOverlays(System.Collections.Generic.IReadOnlyList{ipdfreely.Services.RasterFormDraw},System.Double)">
+        <member name="M:ipdfreely.Services.PdfOverlayExportService.BuildPdfFromRastersAndOverlays(System.Collections.Generic.IReadOnlyList{ipdfreely.Services.RasterFormDraw},System.Double,ipdfreely.Services.ILoggingService)">
             <summary>
             Builds a new PDF from full-page PNG rasters and optional overlay text per page.
             Uses the original page dimensions so that exported text size and position

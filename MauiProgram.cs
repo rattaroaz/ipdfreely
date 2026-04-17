@@ -30,6 +30,7 @@ namespace ipdfreely
             builder.Services.AddSingleton<PdfContentDetectionService>();
             builder.Services.AddSingleton<PdfExportService>();
             builder.Services.AddSingleton<ILoggingService, LoggingService>();
+            builder.Services.AddSingleton<ILoggerProvider, LoggingServiceForwardingLoggerProvider>();
 
 #if DEBUG
     		builder.Logging.AddDebug();
