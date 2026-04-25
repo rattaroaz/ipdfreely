@@ -245,6 +245,27 @@ public class LoggingServiceForwardingLoggerProviderTests
         }
     }
 
+    [Fact]
+    public async Task Log_WhenStateIsKeyValueList_AppendsStructuredProperties()
+    {
+        var (svc, provider, logger) = Create("struct");
+        using (svc) using (provider)
+        {
+            var state = new List<KeyValuePair<string, object?>>
+            {
+                new("N", 7),
+                new("OriginalFormat", "template {N}")
+            };
+            logger.Log(MsLogLevel.Information, new EventId(0), state, null,
+                (s, ex) => "result");
+            await svc.FlushAsync();
+
+            var recent = string.Join("\n", svc.GetRecentLogs(20));
+            recent.Should().Contain("N=7").And.Contain("result");
+            recent.Should().NotContain("OriginalFormat");
+        }
+    }
+
     // ── Scope ───────────────────────────────────────────────────
 
     [Fact]

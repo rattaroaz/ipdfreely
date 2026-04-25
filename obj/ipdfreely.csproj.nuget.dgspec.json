@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.csproj": {}
+    "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.csproj": {}
   },
   "projects": {
-    "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.csproj": {
+    "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.csproj",
+        "projectUniqueName": "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.csproj",
         "projectName": "ipdfreely",
-        "projectPath": "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.csproj",
+        "projectPath": "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.csproj",
         "packagesPath": "C:\\Users\\kimri\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\obj\\",
+        "outputPath": "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [

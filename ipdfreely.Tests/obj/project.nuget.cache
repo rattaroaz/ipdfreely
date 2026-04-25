@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "vT66l1ex6bY=",
+  "dgSpecHash": "HRJCUFtn8vk=",
   "success": true,
-  "projectFilePath": "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj",
+  "projectFilePath": "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\kimri\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
     "C:\\Users\\kimri\\.nuget\\packages\\coverlet.collector\\6.0.4\\coverlet.collector.6.0.4.nupkg.sha512",

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj": {}
+    "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj": {}
   },
   "projects": {
-    "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj": {
+    "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj",
+        "projectUniqueName": "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj",
         "projectName": "ipdfreely.Tests",
-        "projectPath": "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj",
+        "projectPath": "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\ipdfreely.Tests.csproj",
         "packagesPath": "C:\\Users\\kimri\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\obj\\",
+        "outputPath": "c:\\Users\\kimri\\OneDrive\\Desktop\\cloned repos\\ipdfreely\\ipdfreely.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [

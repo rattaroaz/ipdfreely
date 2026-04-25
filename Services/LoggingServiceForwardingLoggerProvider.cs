@@ -1,3 +1,4 @@
+using System.Collections;
 using Microsoft.Extensions.Logging;
 using MsLogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -73,28 +74,57 @@ public sealed class LoggingServiceForwardingLoggerProvider : ILoggerProvider
             if (eventId.Id != 0)
                 body += $" (EventId={eventId.Id})";
 
-            switch (logLevel)
-            {
-                case MsLogLevel.Trace:
-                case MsLogLevel.Debug:
-                    _logging.LogDebug("{0}", body);
-                    break;
-                case MsLogLevel.Information:
-                    _logging.LogInfo("{0}", body);
-                    break;
-                case MsLogLevel.Warning:
-                    _logging.LogWarning("{0}", body);
-                    break;
-                case MsLogLevel.Error:
-                case MsLogLevel.Critical:
-                    _logging.LogError("{0}", exception, body);
-                    break;
-                default:
-                    _logging.LogInfo("{0}", body);
-                    break;
-            }
+            var props = ExtractStateProperties(state);
+            _logging.LogWithNamedState(FromMsLogLevel(logLevel), body, exception, props);
         }
     }
+
+    private static IReadOnlyList<KeyValuePair<string, object?>>? ExtractStateProperties<TState>(TState state)
+    {
+        if (state is IReadOnlyList<KeyValuePair<string, object?>> ro1)
+        {
+            return ro1;
+        }
+        if (state is IReadOnlyList<KeyValuePair<string, object>> ro2)
+        {
+            var list = new List<KeyValuePair<string, object?>>(ro2.Count);
+            foreach (var kv in ro2)
+            {
+                list.Add(new KeyValuePair<string, object?>(kv.Key, kv.Value));
+            }
+            return list;
+        }
+        if (state is IEnumerable<KeyValuePair<string, object?>> e0)
+        {
+            return e0 is List<KeyValuePair<string, object?>> l0 ? l0 : e0.ToList();
+        }
+        if (state is IEnumerable enumerable && state is not string)
+        {
+            var pairs = new List<KeyValuePair<string, object?>>();
+            foreach (var o in enumerable)
+            {
+                if (o is KeyValuePair<string, object?> a1)
+                {
+                    pairs.Add(a1);
+                }
+                else if (o is KeyValuePair<string, object> a2)
+                {
+                    pairs.Add(new KeyValuePair<string, object?>(a2.Key, a2.Value));
+                }
+            }
+            return pairs.Count == 0 ? null : pairs;
+        }
+        return null;
+    }
+
+    private static LogLevel FromMsLogLevel(MsLogLevel l) => l switch
+    {
+        MsLogLevel.Trace or MsLogLevel.Debug => LogLevel.Debug,
+        MsLogLevel.Information => LogLevel.Info,
+        MsLogLevel.Warning => LogLevel.Warning,
+        MsLogLevel.Error or MsLogLevel.Critical => LogLevel.Error,
+        _ => LogLevel.Info
+    };
 
     private sealed class NullScope : IDisposable
     {

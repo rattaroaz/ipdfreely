@@ -345,6 +345,39 @@ public class LoggingServiceTests
         await svc.FlushAsync();
     }
 
+    [Fact]
+    public async Task FlushAsync_TwoInParallel_BothComplete()
+    {
+        var svc = CreateService();
+        svc.LogInfo("before");
+        var t1 = svc.FlushAsync();
+        var t2 = svc.FlushAsync();
+        await Task.WhenAll(t1, t2);
+    }
+
+    [Fact]
+    public void LogWithNamedState_IncludesKeyValuePairsInLine()
+    {
+        var svc = CreateService();
+        var props = new List<KeyValuePair<string, object?>>
+        {
+            new("A", 1),
+            new("OriginalFormat", "ignored in output")
+        };
+        svc.LogWithNamedState(LogLevel.Info, "base", null, props);
+
+        var line = string.Join("\n", svc.GetRecentLogs(5));
+        line.Should().Contain("base").And.Contain("A=1").And.NotContain("OriginalFormat");
+    }
+
+    [Fact]
+    public async Task DisposeAsync_CanBeAwaitedMultipleTimes()
+    {
+        var svc = CreateService();
+        await svc.DisposeAsync();
+        await svc.DisposeAsync();
+    }
+
     // ── Dispose ─────────────────────────────────────────────────
 
     [Fact]
